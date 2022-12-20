@@ -1,0 +1,64 @@
+ENTITY("Document"):
+    NODE("Document") document:
+        + docID = Document.id
+        - volume = Document.volume
+        - date = Document.date
+        - year = Document.year
+        - title = Document.title
+        - personSentBy = Document.personSentBy
+        - personSentTo = Document.personSentTo
+        - instutionSentBy = Document.instutionSentBy
+        - instutionSentTo = Document.instutionSentTo
+        #- personMentioned = Document.personMentioned []?
+        #- instutionMentioned = Document.instutionMentioned []?
+    NODE("Volume") volume:
+        + id = Document.volume
+        - era = Document.era
+        #- name = 
+    NODE("Source") source:
+        + name = Document.source
+    NODE("City") city:
+        + name = Document.city
+        #- country = Document.country
+    RELATION(document, "INSTANCE_OF", volume):
+    RELATION(document, "STORED", source):
+    RELATION(document, "FROM", city):
+
+
+ENTITY("Person"):
+    NODE("Person") person:
+        + id = INT(Person.id)
+        - name = Person.name
+        - description = Person.description
+        #- bornIn = Person.bornCountry
+    RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
+    RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
+
+
+ENTITY("Year"):
+    NODE("Year") year:
+        + year = INT(Year.year)
+    RELATION(MATCH("Document", year=Year.year), "DATED", year):
+
+
+ENTITY("Era"):
+    NODE("PresidentialEra") pe:
+        + president = Era.president
+        + startDate = Era.startDate 
+        + endDate = Era.endDate
+        + startYear = Era.startYear
+        + endYear = Era.endYear
+    RELATION(MATCH("Volume", era=Era.president), "DURING", pe):
+    RELATION(MATCH("Year", year=Era.startYear), "STARTED_AT", pe):
+    RELATION(MATCH("Year", year=Era.endYear), "ENDED_AT", pe):
+
+
+ENTITY("Country"):
+    NODE("Country") country:
+        + name = Country.name
+        + capital = Country.capital
+        + governance = Country.governance
+        + continent = Country.continent
+        + region = Country.region
+    RELATION(MATCH("City", country=Country.name), "LOCATED_IN", country):
+    RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
