@@ -1,6 +1,7 @@
 ENTITY("Document"):
-    NODE("Document") document:
+    NODE("Document") document: # NODE("Document", "Historical") or NODE("Document", "Editorial")
         + docID = Document.id
+        - subtype = Document.type # historical or editorial
         - volume = Document.volume
         - date = Document.date
         - year = Document.year
@@ -15,6 +16,7 @@ ENTITY("Document"):
         + id = Document.volume
         - era = Document.era
         #- name = 
+        #- preface =
     NODE("Source") source:
         + name = Document.source
     NODE("City") city:
@@ -44,10 +46,10 @@ ENTITY("Year"):
 ENTITY("Era"):
     NODE("PresidentialEra") pe:
         + president = Era.president
-        + startDate = Era.startDate 
-        + endDate = Era.endDate
-        + startYear = Era.startYear
-        + endYear = Era.endYear
+        - startDate = Era.startDate 
+        - endDate = Era.endDate
+        - startYear = Era.startYear
+        - endYear = Era.endYear
     RELATION(MATCH("Volume", era=Era.president), "DURING", pe):
     RELATION(MATCH("Year", year=Era.startYear), "STARTED_AT", pe):
     RELATION(MATCH("Year", year=Era.endYear), "ENDED_AT", pe):
@@ -56,9 +58,9 @@ ENTITY("Era"):
 ENTITY("Country"):
     NODE("Country") country:
         + name = Country.name
-        + capital = Country.capital
-        + governance = Country.governance
-        + continent = Country.continent
-        + region = Country.region
+        - capital = Country.capital
+        - governance = Country.governance
+        - continent = Country.continent
+        - region = Country.region
     RELATION(MATCH("City", country=Country.name), "LOCATED_IN", country):
     RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
