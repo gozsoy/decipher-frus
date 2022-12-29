@@ -1,17 +1,17 @@
 ENTITY("Document"):
-    NODE("Document") document: # NODE("Document", "Historical") or NODE("Document", "Editorial")
+    NODE("Document") document:
         + docID = Document.id
         - subtype = Document.type # historical or editorial
         - volume = Document.volume
         - date = Document.date
         - year = Document.year
         - title = Document.title
-        - personSentBy = Document.personSentBy
-        - personSentTo = Document.personSentTo
-        - instutionSentBy = Document.instutionSentBy
-        - instutionSentTo = Document.instutionSentTo
-        #- personMentioned = Document.personMentioned []?
-        #- instutionMentioned = Document.instutionMentioned []?
+        - personSentBy = Document.personSentBy  #[]
+        - personSentTo = Document.personSentTo  #[]
+        - instutionSentBy = Document.instutionSentBy    #[]
+        - instutionSentTo = Document.instutionSentTo    #[]
+        - personMentioned = Document.personMentioned    #[]
+        - instutionMentioned = Document.instutionMentioned  #[]
     NODE("Volume") volume:
         + id = Document.volume
         - era = Document.era
@@ -35,6 +35,7 @@ ENTITY("Person"):
         #- bornIn = Person.bornCountry
     RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
     RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
+    #RELATION(MATCH("Document", personMentioned=Person.id), "MENTIONED", person):
 
 
 ENTITY("Year"):
@@ -64,3 +65,12 @@ ENTITY("Country"):
         - region = Country.region
     RELATION(MATCH("City", country=Country.name), "LOCATED_IN", country):
     RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
+
+
+#ENTITY("Instution"):
+#    NODE("Instution") inst:
+#        + id = INT(Instution.id)
+#        - name = Instution.name
+#        - description = Instution.description
+#    RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
+#    RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
