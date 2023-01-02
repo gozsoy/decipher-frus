@@ -3,15 +3,15 @@ ENTITY("Document"):
         + docID = Document.id
         - subtype = Document.type # historical or editorial
         - volume = Document.volume
-        - date = Document.date
-        - year = Document.year
+        - date = DATE(Document.date)
+        - year = INT(Document.year)
         - title = Document.title
-        - personSentBy = Document.personSentBy  #[]
-        - personSentTo = Document.personSentTo  #[]
-        - instutionSentBy = Document.instutionSentBy    #[]
-        - instutionSentTo = Document.instutionSentTo    #[]
-        - personMentioned = Document.personMentioned    #[]
-        - instutionMentioned = Document.instutionMentioned  #[]
+        - personSentBy = Document.personSentBy #[] add this info in person node such as -sent, -received, -mentioned
+        - personSentTo = Document.personSentTo #[]
+        - instutionSentBy = Document.instutionSentBy #[]
+        - instutionSentTo = Document.instutionSentTo #[]
+        - personMentioned = Document.personMentioned #[]
+        - instutionMentioned = Document.instutionMentioned #[]
     NODE("Volume") volume:
         + id = Document.volume
         - era = Document.era
@@ -29,12 +29,12 @@ ENTITY("Document"):
 
 ENTITY("Person"):
     NODE("Person") person:
-        + id = INT(Person.id)
+        + id = Person.id
         - name = Person.name
         - description = Person.description
         #- bornIn = Person.bornCountry
-    RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
-    RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
+    #RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
+    #RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
     #RELATION(MATCH("Document", personMentioned=Person.id), "MENTIONED", person):
 
 
@@ -47,24 +47,24 @@ ENTITY("Year"):
 ENTITY("Era"):
     NODE("PresidentialEra") pe:
         + president = Era.president
-        - startDate = Era.startDate 
-        - endDate = Era.endDate
-        - startYear = Era.startYear
-        - endYear = Era.endYear
+        - startDate = DATE(Era.startDate)
+        - endDate = DATE(Era.endDate)
+        - startYear = INT(Era.startYear)
+        - endYear = INT(Era.endYear)
     RELATION(MATCH("Volume", era=Era.president), "DURING", pe):
     RELATION(MATCH("Year", year=Era.startYear), "STARTED_AT", pe):
     RELATION(MATCH("Year", year=Era.endYear), "ENDED_AT", pe):
 
 
-ENTITY("Country"):
-    NODE("Country") country:
-        + name = Country.name
-        - capital = Country.capital
-        - governance = Country.governance
-        - continent = Country.continent
-        - region = Country.region
-    RELATION(MATCH("City", country=Country.name), "LOCATED_IN", country):
-    RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
+#ENTITY("Country"):
+#    NODE("Country") country:
+#        + name = Country.name
+#        - capital = Country.capital
+#        - governance = Country.governance
+#        - continent = Country.continent
+#        - region = Country.region
+#    RELATION(MATCH("City", country=Country.name), "LOCATED_IN", country):
+#    RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
 
 
 #ENTITY("Instution"):
