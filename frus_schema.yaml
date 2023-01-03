@@ -1,30 +1,30 @@
 ENTITY("Document"):
     NODE("Document") document:
         + docID = Document.id
-        - subtype = Document.type # historical or editorial
+        - subtype = Document.subtype # historical or editorial
         - volume = Document.volume
-        - date = DATE(Document.date)
+        - date = AUX(Document.date)
         - year = INT(Document.year)
         - title = Document.title
-        - personSentBy = Document.personSentBy #[] add this info in person node such as -sent, -received, -mentioned
-        - personSentTo = Document.personSentTo #[]
-        - instutionSentBy = Document.instutionSentBy #[]
-        - instutionSentTo = Document.instutionSentTo #[]
-        - personMentioned = Document.personMentioned #[]
-        - instutionMentioned = Document.instutionMentioned #[]
+        - era = Document.era
+        - personSentBy = Document.person_sentby #[]
+        - personSentTo = Document.person_sentto #[]
+        - instutionSentBy = Document.inst_sentby #[]
+        - instutionSentTo = Document.inst_sentto #[]
+        - personMentioned = Document.person_mentioned #[]
+        - instutionMentioned = Document.inst_mentioned #[]
     NODE("Volume") volume:
         + id = Document.volume
-        - era = Document.era
         #- name = 
         #- preface =
-    NODE("Source") source:
+    ONLY_CREATE_IF_EXISTS(NODE("Source"), 'source') source:
         + name = Document.source
-    NODE("City") city:
+    ONLY_CREATE_IF_EXISTS(NODE("City"), 'city') city:
         + name = Document.city
         #- country = Document.country
     RELATION(document, "INSTANCE_OF", volume):
-    RELATION(document, "STORED", source):
-    RELATION(document, "FROM", city):
+    ONLY_CREATE_IF_EXISTS(RELATION(document, "STORED", source), 'source'):
+    ONLY_CREATE_IF_EXISTS(RELATION(document, "FROM", city), 'city'):
 
 
 ENTITY("Person"):
@@ -33,27 +33,46 @@ ENTITY("Person"):
         - name = Person.name
         - description = Person.description
         #- bornIn = Person.bornCountry
-    #RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
-    #RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
-    #RELATION(MATCH("Document", personMentioned=Person.id), "MENTIONED", person):
 
 
 ENTITY("Year"):
     NODE("Year") year:
         + year = INT(Year.year)
-    RELATION(MATCH("Document", year=Year.year), "DATED", year):
+    RELATION(MATCH("Document", year=INT(Year.year)), "DATED", year):
 
 
 ENTITY("Era"):
     NODE("PresidentialEra") pe:
-        + president = Era.president
-        - startDate = DATE(Era.startDate)
-        - endDate = DATE(Era.endDate)
+        + name = Era.president
+        - startDate = AUX(Era.startDate)
+        - endDate = AUX(Era.endDate)
         - startYear = INT(Era.startYear)
         - endYear = INT(Era.endYear)
-    RELATION(MATCH("Volume", era=Era.president), "DURING", pe):
-    RELATION(MATCH("Year", year=Era.startYear), "STARTED_AT", pe):
-    RELATION(MATCH("Year", year=Era.endYear), "ENDED_AT", pe):
+    RELATION(MATCH("Document", era=Era.president), "DURING", pe):
+    RELATION(pe, "STARTED_AT", MATCH("Year", year=INT(Era.startYear))):
+    RELATION(pe, "ENDED_AT", MATCH("Year", year=INT(Era.endYear))):
+
+
+ENTITY("PersonSentBy"):
+    NODE("Person") person:
+        + id = PersonSentBy.person_id
+    NODE("Document") document:
+        + docID = PersonSentBy.sent
+    RELATION(document, "SENT_BY", person):
+
+ENTITY("PersonSentTo"):
+    NODE("Person") person:
+        + id = PersonSentTo.person_id
+    NODE("Document") document:
+        + docID = PersonSentTo.received
+    RELATION(document, "SENT_TO", person):
+
+ENTITY("PersonMentionedIn"):
+    NODE("Person") person:
+        + id = PersonMentionedIn.person_id
+    NODE("Document") document:
+        + docID = PersonMentionedIn.mentioned_in
+    RELATION(document, "MENTIONED", person):
 
 
 #ENTITY("Country"):

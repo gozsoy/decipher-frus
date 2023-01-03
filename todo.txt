@@ -1,0 +1,19 @@
+#plan
+DONE-initial kg construction
+DONE-make sure person sent to list values can map to person nodes
+a-10 years of data kg construction
+    make sure persons and instutions unified across volumes, how?
+
+import wikidata into neo4j for country (city->country)
+entity linking, then person->political view
+named entity recognition
+co-reference resolution?
+
+#challenges
+personId is unique within volume, not series: think on how to merge series-wide
+handle person who are not annotated with persName tag
+how to get instution names
+source requires more processing
+
+#design
+for person_mentioned, included all persName tags regardless of in title, text, or closer except ones within note tag
