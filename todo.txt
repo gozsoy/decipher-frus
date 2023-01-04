@@ -1,10 +1,14 @@
 #plan
 DONE-initial kg construction
 DONE-make sure person sent to list values can map to person nodes
-a-10 years of data kg construction
-    make sure persons and instutions unified across volumes, how?
 
-import wikidata into neo4j for country (city->country)
+jan 4
+1- unify persons across volumes -> maybe via wikidata (how to search wikidata)
+2- read on importing wikidata into neo4j for country (city->country)
+3- cypher exemplary queries via reaching KG from python
+4- 2 presidential era KG construction
+    
+
 entity linking, then person->political view
 named entity recognition
 co-reference resolution?
