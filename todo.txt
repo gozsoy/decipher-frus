@@ -2,13 +2,16 @@
 DONE-initial kg construction
 DONE-make sure person sent to list values can map to person nodes
 
-jan 4
-1- unify persons across volumes -> maybe via wikidata (how to search wikidata)
+jan 6
+1- unify persons across volumes -> swap, str_sim, wikidata
 2- read on importing wikidata into neo4j for country (city->country)
+3- readings
+
 3- cypher exemplary queries via reaching KG from python
 4- 2 presidential era KG construction
-    
 
+
+read more on entity extraction from survey
 entity linking, then person->political view
 named entity recognition
 co-reference resolution?
