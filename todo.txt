@@ -2,15 +2,18 @@
 DONE-initial kg construction
 DONE-make sure person sent to list values can map to person nodes
 
-jan 6
-1- unify persons across volumes -> swap, str_sim, wikidata
-2- read on importing wikidata into neo4j for country (city->country)
+jan 10
+1- person-wikidata match
+2- read on importing wikidata into neo4j for Country
+3- city and country-wikidata match
+4- 2 presidential era KG construction
+5- cypher exemplary queries via reaching KG from python
+
 3- readings
 
-3- cypher exemplary queries via reaching KG from python
-4- 2 presidential era KG construction
 
-
+matching more with sentence similarity, also reducing multi wiki matches with sentence similarity
+if same name person appear more than one, select the one with most occurances!
 read more on entity extraction from survey
 entity linking, then person->political view
 named entity recognition

@@ -55,10 +55,11 @@ ENTITY("Era"):
 
 ENTITY("PersonSentBy"):
     NODE("Person") person:
-        + id = PersonSentBy.person_id
+        + id = PersonSentBy.person_id # merged new id
     NODE("Document") document:
         + docID = PersonSentBy.sent
     RELATION(document, "SENT_BY", person):
+        # dateSent = PersonSentBy.dateSent
 
 ENTITY("PersonSentTo"):
     NODE("Person") person:
