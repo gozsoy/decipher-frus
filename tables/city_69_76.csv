@@ -1,0 +1,239 @@
+,Unnamed: 0,name,country,extension_match,wc_guess,wiki_capital_guess,wiki_bigcity_guess,merged_wiki
+0,0,Washington,United States of America,,United States,United States of America,,United States of America
+1,1,Moscow,Russia,,Russia,Russia,,Russia
+2,2,Vienna,Austria,,Austria,Austria,,Austria
+3,3,Camp David,,,,,,
+4,4,Salzburg White House,"['Austria', 'Cape Verde']",,"['Austria', 'Cape Verde']",,,
+5,5,Salzburg,Austria,Austria,,,,
+6,6,Helsinki,Finland,,,Finland,,Finland
+7,7,Cape Town,South Africa,,,South Africa,,South Africa
+8,8,Pretoria,South Africa,,,South Africa,,South Africa
+9,9,New York,United States of America,,United States,,United States of America,United States of America
+10,10,London,United Kingdom,,,United Kingdom,,United Kingdom
+11,11,Yaounde,Cameroon,,,Cameroon,,Cameroon
+12,12,Oeiras,Portugal,Portugal,,,,
+13,13,Kinshasa,Democratic Republic of the Congo,,Democratic Republic of the Congo,Democratic Republic of the Congo,,Democratic Republic of the Congo
+14,14,Lourenco Marques,Mozambique,,,Mozambique,,Mozambique
+15,15,Lisbon,Portugal,,Portugal,Portugal,,Portugal
+16,16,Luanda,Angola,,Angola,Angola,,Angola
+17,17,Paris,France,,,France,,France
+18,18,Tehran,Iran,,,Iran,,Iran
+19,19,Jidda,Saudi Arabia,,,,Saudi Arabia,Saudi Arabia
+20,20,Brussels,Belgium,,,Belgium,,Belgium
+21,21,Boston,United States of America,,,,United States of America,United States of America
+22,22,Stockholm,Sweden,,Sweden,Sweden,,Sweden
+23,23,Tanzania,,,,,,
+24,24,Dar es Salaam,Tanzania,,"['Cape Verde', 'Tanzania']",,Tanzania,Tanzania
+25,25,Lusaka,Zambia,,Zambia,Zambia,,Zambia
+26,26,Grafenau,Germany,Germany,,,,
+27,27,Zurich,Switzerland,,Switzerland,,,
+28,28,Geneva,Switzerland,,Switzerland,,Switzerland,Switzerland
+29,29,Bonn,Germany,,,,Germany,Germany
+30,30,San Clemente,United States,United States,,,,
+31,31,Warsaw,Poland,,,Poland,,Poland
+32,32,Sofia,Bulgaria,,Madagascar,Bulgaria,,Bulgaria
+33,33,Prague,Czech Republic,,,Czech Republic,,Czech Republic
+34,34,Budapest,Hungary,,Hungary,Hungary,,Hungary
+35,35,Bucharest,Romania,,,Romania,,Romania
+36,36,Belgrade,Serbia,,,Serbia,,Serbia
+37,37,Athens,Greece,,,Greece,,Greece
+38,38,Rome,Italy,,,Italy,,Italy
+39,39,Nicosia,Cyprus,,,Cyprus,,Cyprus
+40,40,Ankara,Turkey,,Turkey,Turkey,,Turkey
+41,41,San Clemente,,,,,,
+42,42,Crimea,Ukraine,,Ukraine,,,
+43,43,Soviet Union,,,,,,
+44,44,Zavidovo,,,,,,
+45,45,Cairo,Egypt,,,Egypt,,Egypt
+46,46,Oreanda,,,,,,
+47,47,Vnukovo,,,,,,
+48,48,San Francisco,Ecuador,,,Ecuador,,Ecuador
+49,49,Colorado Springs,United States,United States,,,,
+50,50,Bangkok,Thailand,,Thailand,Thailand,,Thailand
+51,51,Los Angeles,United States,United States,,,,
+52,52,New Orleans,United States,United States,,,,
+53,53,Chicago,United States,United States,,,,
+54,54,Naples,Italy,Italy,,,,
+55,55,Newmarket-on-Fergus,Ireland,Ireland,,,,
+56,56,Newport,United States,United States,,,,
+57,57,Bermuda,,,,,,
+58,58,Mexico City,Mexico,,Mexico,,Mexico,Mexico
+59,59,Annapolis,United States,United States,,,,
+60,60,New Orleans,United States of America,,,,United States of America,United States of America
+61,61,Bloomington,United States,United States,,,,
+62,62,Honolulu,United States of America,,,,United States of America,United States of America
+63,63,Baltimore,,,,,,
+64,64,Taipei,Taiwan,,Taiwan,Taiwan,,Taiwan
+65,65,Kabul,Afghanistan,,Afghanistan,,,
+66,66,Islamabad,Pakistan,,,Pakistan,,Pakistan
+67,67,Beijing,People's Republic of China,,China,People's Republic of China,,People's Republic of China
+68,68,Key Biscayne,United States,United States,,,,
+69,69,Shanghai,People's Republic of China,,Myanmar,,People's Republic of China,People's Republic of China
+70,70,New Delhi,India,,,India,,India
+71,71,Tokyo,Japan,,Japan,Japan,,Japan
+72,72,Karuizawa,Japan,Japan,,,,
+73,73,Oahu,United States,United States,,,,
+74,74,Camp David,United States,United States,,,,
+75,75,Frankfurt,Germany,,,,Germany,Germany
+76,76,The Hague,Netherlands,,,Netherlands,,Netherlands
+77,77,Angra,Portugal,Portugal,,,,
+78,78,Kathmandu,Nepal,,,Nepal,,Nepal
+79,79,Jerusalem,Germany,,Israel,,Germany,Germany
+80,80,Vladivostok,,,,,,
+81,81,Vail,United States,United States,,,,
+82,82,Miami,,,,,,
+83,83,Denver,United States of America,,,,United States of America,United States of America
+84,84,Reykjavik,Iceland,,,Iceland,,Iceland
+85,85,Ottawa,Canada,,,Canada,,Canada
+86,86,Quebec City,Canada,,Canada,,Canada,Canada
+87,87,Oslo,Norway,,Norway,Norway,,Norway
+88,88,Madrid,Spain,,Spain,Spain,,Spain
+89,89,Trois Ilets,Martinique,Martinique,,,,
+90,90,Washington,United States of America,,United States,United States of America,,United States of America
+91,91,Saigon,Republic of Vietnam,,,Republic of Vietnam,,Republic of Vietnam
+92,92,Vientiane,Laos,,Laos,Laos,,Laos
+93,93,Midway Island,,,,,,
+94,94,Phnom Penh,Cambodia,,Cambodia,Cambodia,,Cambodia
+95,95,Hartford,United States,United States,,,,
+96,96,Naples,Italy,,,,Italy,Italy
+97,97,Terceira,Portugal,Portugal,,,,
+98,98,Salzburg,Austria,,"['Austria', 'Cape Verde']",,Austria,Austria
+99,99,Damascus,Syria,,,,Syria,Syria
+100,100,Bad Reichenhall,,,,,,
+101,101,Dusseldorf,Germany,,,,Germany,Germany
+102,102,Miesbach,Japan,,Japan,,,
+103,103,Martinique,Martinique,,Martinique,,,
+104,104,Conakry,Guinea,,Guinea,,,
+105,105,Panama City,Panama,,,Panama,,Panama
+106,106,Hong Kong,People's Republic of China,,,,People's Republic of China,People's Republic of China
+107,107,Canberra,Australia,,,Australia,,Australia
+108,108,Dacca,Bangladesh,,,Bangladesh,,Bangladesh
+109,109,Rawalpindi,Pakistan,,,,Pakistan,Pakistan
+110,110,Palm Springs,United States,United States,,,,
+111,111,Karachi,Pakistan,,Togo,,Pakistan,Pakistan
+112,112,Calcutta,India,,,,India,India
+113,113,Lajes Air Field,Portugal,Portugal,,,,
+114,114,Lajes,Portugal,Portugal,,,,
+115,115,Hanoi,Vietnam,,,Vietnam,,Vietnam
+116,116,Wellington,New Zealand,,New Zealand,New Zealand,,New Zealand
+117,117,Algiers,Algeria,,,Algeria,,Algeria
+118,118,Addis Ababa,Ethiopia,,,Ethiopia,,Ethiopia
+119,119,Tripoli,Libya,,Libya,Libya,,Libya
+120,120,Benghazi,Libya,,,,Libya,Libya
+121,121,Rabat,Morocco,,,Morocco,,Morocco
+122,122,Tunis,Tunisia,,,Tunisia,,Tunisia
+123,123,Seoul,South Korea,,South Korea,South Korea,,South Korea
+124,124,San Francisco,United States,United States,,,,
+125,125,Abidjan,Ivory Coast,Ivory Coast,,,,
+126,126,Lagos,Nigeria,,Nigeria,,Nigeria,Nigeria
+127,127,Abidjan,Ivory Coast,,,Ivory Coast,,Ivory Coast
+128,128,[text not declassified],,,,,,
+129,129,Kampala,Uganda,,,Uganda,,Uganda
+130,130,Asmara,Eritrea,,,Eritrea,,Eritrea
+131,131,Mogadiscio,Somalia,,,Somalia,,Somalia
+132,132,Hawaii,United States,,United States,,,
+133,133,Colombo,Sri Lanka,,,Sri Lanka,,Sri Lanka
+134,134,New York City,United States of America,,United States,,United States of America,United States of America
+135,135,Alexandria,Egypt,Egypt,,,,
+136,136,Marrakech,Morocco,,,,Morocco,Morocco
+137,137,Amman,Jordan,,Jordan,Jordan,,Jordan
+138,138,Torrejon,,,,,,
+139,139,Shiraz,India,,,India,,India
+140,140,Tel Aviv,Israel,,Israel,,Israel,Israel
+141,141,Beirut,Lebanon,,,Lebanon,,Lebanon
+142,142,Baghdad,Iraq,,,Iraq,,Iraq
+143,143,Buenos Aires,Argentina,,Argentina,Argentina,,Argentina
+144,144,La Paz,Mexico,,"['Bolivia', 'Honduras', 'El Salvador']",,Mexico,Mexico
+145,145,Rio de Janeiro,Brazil,,Brazil,Brazil,,Brazil
+146,146,Brasilia,Brazil,,,Brazil,,Brazil
+147,147,Bogotá,Colombia,,,Colombia,,Colombia
+148,148,San Jose,Costa Rica,,,Costa Rica,,Costa Rica
+149,149,San José,Costa Rica,,"['Costa Rica', 'Uruguay']",Costa Rica,,Costa Rica
+150,150,Santo Domingo,Dominican Republic,,Dominican Republic,Dominican Republic,,Dominican Republic
+151,151,Quito,Ecuador,,,Ecuador,,Ecuador
+152,152,Guatemala City,Guatemala,,Guatemala,Guatemala,,Guatemala
+153,153,Managua,Nicaragua,,Nicaragua,Nicaragua,,Nicaragua
+154,154,Georgetown,Guyana,,,Guyana,,Guyana
+155,155,Port-au-Prince,Haiti,,,Haiti,,Haiti
+156,156,Kingston,Jamaica,,Jamaica,Jamaica,,Jamaica
+157,157,Albany,United States of America,,Romania,,United States of America,United States of America
+158,158,El Mirador,,,,,,
+159,159,Puerto Somoza,,,,,,
+160,160,Asuncion,Paraguay,,,Paraguay,,Paraguay
+161,161,Lima,Peru,,,Peru,,Peru
+162,162,San Salvador,El Salvador,,"['Cape Verde', 'El Salvador']",El Salvador,,El Salvador
+163,163,Caracas,Venezuela,,,Venezuela,,Venezuela
+164,164,Nairobi,Kenya,,,Kenya,,Kenya
+165,165,Dakar,Senegal,,Senegal,Senegal,,Senegal
+166,166,Bujumbura,Burundi,,,,Burundi,Burundi
+167,167,Khartoum,Sudan,,Sudan,Sudan,,Sudan
+168,168,Isfahan,Iran,,Iran,,Iran,Iran
+169,169,Thailand,,,,,,
+170,170,Riyadh,Saudi Arabia,,,Saudi Arabia,,Saudi Arabia
+171,171,Kuwait City,Kuwait,,,Kuwait,,Kuwait
+172,172,Abu Dhabi,United Arab Emirates,,United Arab Emirates,United Arab Emirates,,United Arab Emirates
+173,173,Manama,Bahrain,,Bahrain,,Bahrain,Bahrain
+174,174,Doha,Qatar,,,Qatar,,Qatar
+175,175,Secretary’s Aircraft,,,,,,
+176,176,Ta’if,Saudi Arabia,,,,Saudi Arabia,Saudi Arabia
+177,177,Sana’a,,,,,,
+178,178,Dublin,Republic of Ireland,,,Republic of Ireland,,Republic of Ireland
+179,179,Valletta,Malta,,Honduras,Malta,,Malta
+180,180,Berlin,Germany,,Germany,Germany,,Germany
+181,181,san Clemente,,,,,,
+182,182,Bonn/Bad Godesberg,,,,,,
+183,183,Key Biscayne,,,,,,
+184,184,Munich,Germany,,,,Germany,Germany
+185,185,Wasington,United States of America,,,United States of America,,United States of America
+186,186,Hangchow,People's Republic of China,,,,People's Republic of China,People's Republic of China
+187,187,Lahore,Pakistan,,,,Pakistan,Pakistan
+188,188,Peking,People's Republic of China,,,People's Republic of China,,People's Republic of China
+189,189,Auckland,New Zealand,,New Zealand,,New Zealand,New Zealand
+190,190,Magdalena de Kino,Mexico,Mexico,,,,
+191,191,Helsinki,Finland,Finland,,,,
+192,192,Trois-îlets,,,,,,
+193,193,Santiago,Venezuela,,Dominican Republic,Venezuela,,Venezuela
+194,194,San José,Costa Rica,Costa Rica,,,,
+195,195,Montreal,Canada,,Myanmar,,Canada,Canada
+196,196,Bankok,Thailand,,,Thailand,,Thailand
+197,197,Valparaiso,Brazil,,,,Brazil,Brazil
+198,198,Camp H.M. Smith,United States,United States,,,,
+199,199,Versailles,,,,,,
+200,200,Bali,Indonesia,,Indonesia,,,
+201,201,Kuala Lumpur,Malaysia,,Malaysia,Malaysia,,Malaysia
+202,202,Djakarta,Indonesia,,,,Indonesia,Indonesia
+203,203,Perth,Australia,,,,Australia,Australia
+204,204,Manila,Philippines,,,,Philippines,Philippines
+205,205,Jakarta,Indonesia,,,,Indonesia,Indonesia
+206,206,Santa Cruz,Bolivia,Bolivia,,,,
+207,207,Brasília,Brazil,,,Brazil,,Brazil
+208,208,Bogota,Colombia,,,Colombia,,Colombia
+209,209,Curaçao,,,,,,
+210,210,Montevideo,Uruguay,,"['Myanmar', 'Uruguay']",Uruguay,,Uruguay
+211,211,Kuwait,Kuwait,,,Kuwait,,Kuwait
+212,212,Balboa Heights,Panama,Panama,,,,
+213,213,San Jose,Costa Rica,Costa Rica,,,,
+214,214,Contadora Island,Panama,Panama,,,,
+215,215,New York,United States of America,,United States,,United States of America,United States of America
+216,216,Cairo,Egypt,,,Egypt,,Egypt
+217,217,Taif,Saudi Arabia,Saudi Arabia,,,,
+218,218,Rambouillet,,,,,,
+219,219,Hakone,,,,,,
+220,220,Tegucigalpa,Honduras,,,Honduras,,Honduras
+221,221,Belize City,Belize,,Belize,,,
+222,222,Masaya,Nicaragua,Nicaragua,,,,
+223,223,Nassau,The Bahamas,,,The Bahamas,,The Bahamas
+224,224,Bridgetown,Barbados,,,Barbados,,Barbados
+225,225,Santiago,Chile,Chile,,,,
+226,226,Tabriz,Iran,,,,Iran,Iran
+227,227,Aswan,Egypt,,,,Egypt,Egypt
+228,228,Herzliyya,,,,,,
+229,229,Virgin Islands,,,,,,
+230,230,Toledo,United States,United States,,,,
+231,231,Pasadena,United States,United States,,,,
+232,232,Dhahran,Saudi Arabia,,,,Saudi Arabia,Saudi Arabia
+233,233,Sanaa,Yemen,,Yemen,Yemen,,Yemen
+234,234,Bern,Switzerland,,Switzerland,Switzerland,,Switzerland
+235,235,Washingon,,,,,,
+236,236,Rambouillet,France,France,,,,
+237,237,Dorado Beach,Puerto Rico,Puerto Rico,,,,
