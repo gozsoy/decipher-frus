@@ -2,18 +2,30 @@
 DONE-initial kg construction
 DONE-make sure person sent to list values can map to person nodes
 
-jan 10
-1- person-wikidata match
-2- read on importing wikidata into neo4j for Country
-3- city and country-wikidata match
-4- 2 presidential era KG construction
-5- cypher exemplary queries via reaching KG from python
+jan 11
+1- city match. how to automatize? finish processing for 2 era 9.30-12.30
+2- read on importing wikidata into neo4j for Country 13-14.15
+3- reading + think on nlp + gds application on our KG specifically 14.15-16
+--sena
+1- 2 presidential era KG construction 18.30-22.30
+2- readings + think on nlp + gds application on our KG specifically 22.30-00
 
-3- readings
+jan 12
+1- cypher exemplary queries via reaching KG from python
+2- slide + overleaf notes
 
 
+improvements on city matching:
+first check if capital or big city if not found check human settlement
+process cities by batch so San jose can match with san jose, costa rica
+each processed city will be base for upcoming ones
+
+readings
+
+improvements on person matching:
 matching more with sentence similarity, also reducing multi wiki matches with sentence similarity
 if same name person appear more than one, select the one with most occurances!
+
 read more on entity extraction from survey
 entity linking, then person->political view
 named entity recognition
