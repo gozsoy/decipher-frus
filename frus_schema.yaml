@@ -21,7 +21,6 @@ ENTITY("Document"):
         + name = Document.source
     ONLY_CREATE_IF_EXISTS(NODE("City"), 'city') city:
         + name = Document.city
-        #- country = Document.country
     RELATION(document, "INSTANCE_OF", volume):
     ONLY_CREATE_IF_EXISTS(RELATION(document, "STORED", source), 'source'):
     ONLY_CREATE_IF_EXISTS(RELATION(document, "FROM", city), 'city'):
@@ -76,15 +75,25 @@ ENTITY("PersonMentionedIn"):
     RELATION(document, "MENTIONED", person):
 
 
-#ENTITY("Country"):
-#    NODE("Country") country:
-#        + name = Country.name
+ENTITY("Country"):
+    NODE("Country") country:
+        + name = Country.countryLabel
+        - url = Country.countryTag
 #        - capital = Country.capital
 #        - governance = Country.governance
 #        - continent = Country.continent
 #        - region = Country.region
-#    RELATION(MATCH("City", country=Country.name), "LOCATED_IN", country):
 #    RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
+
+
+ENTITY("CityCountry"):
+    NODE("City") city:
+        + name = CityCountry.name
+        - name_list = CityCountry.name_list
+    ONLY_CREATE_IF_EXISTS(NODE("Country"), 'country') country:
+        + name = CityCountry.country
+    ONLY_CREATE_IF_EXISTS(RELATION(city, "LOCATED_IN", country), 'country'):
+
 
 
 #ENTITY("Instution"):
