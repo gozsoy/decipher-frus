@@ -9,9 +9,9 @@ ENTITY("Document"):
         - era = Document.era
         - personSentBy = Document.person_sentby #[]
         - personSentTo = Document.person_sentto #[]
+        - personMentioned = Document.person_mentioned #[]
         - instutionSentBy = Document.inst_sentby #[]
         - instutionSentTo = Document.inst_sentto #[]
-        - personMentioned = Document.person_mentioned #[]
         - instutionMentioned = Document.inst_mentioned #[]
     NODE("Volume") volume:
         + id = Document.volume
@@ -28,9 +28,10 @@ ENTITY("Document"):
 
 ENTITY("Person"):
     NODE("Person") person:
-        + id = Person.id
-        - name = Person.name
-        - description = Person.description
+        + name = Person.name_set
+        - name_list = Person.name_list
+        - id_list = Person.id_list
+        #- description_list = Person.description_list
         #- bornIn = Person.bornCountry
 
 
@@ -54,7 +55,7 @@ ENTITY("Era"):
 
 ENTITY("PersonSentBy"):
     NODE("Person") person:
-        + id = PersonSentBy.person_id # merged new id
+        + name = PersonSentBy.person_name
     NODE("Document") document:
         + docID = PersonSentBy.sent
     RELATION(document, "SENT_BY", person):
@@ -62,14 +63,14 @@ ENTITY("PersonSentBy"):
 
 ENTITY("PersonSentTo"):
     NODE("Person") person:
-        + id = PersonSentTo.person_id
+        + name = PersonSentTo.person_name
     NODE("Document") document:
         + docID = PersonSentTo.received
     RELATION(document, "SENT_TO", person):
 
 ENTITY("PersonMentionedIn"):
     NODE("Person") person:
-        + id = PersonMentionedIn.person_id
+        + name = PersonMentionedIn.person_name
     NODE("Document") document:
         + docID = PersonMentionedIn.mentioned_in
     RELATION(document, "MENTIONED", person):
