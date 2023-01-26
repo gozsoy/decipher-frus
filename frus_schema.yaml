@@ -1,6 +1,6 @@
 ENTITY("Document"):
     NODE("Document") document:
-        + docID = Document.id
+        + docID = EXPORT_TEXT_TO_DB(Document.id_to_text)
         - subtype = Document.subtype # historical or editorial
         - volume = Document.volume
         - date = AUX(Document.date)
