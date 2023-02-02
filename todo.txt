@@ -1,26 +1,62 @@
-#plan
 DONE-initial kg construction
 DONE-make sure person sent to list values can map to person nodes
 DONE- city match. how to automatize? finish processing for 2 era
 DONE- fetch country url's and unify country names
+DONE- unified persons into KG + 2 presidential era KG construction
+DONE- read on importing wikidata into neo4j for Country
+DONE-texts -> sql, sql id -> KG
 
-jan 15
+feb 2
+topic modeling 9-12.30 topics over time +keybert + lda possibilities again!
+topic semantics should be continous not discrete
+wikidata extraction for kg expansion 13.30-17.30 (use as much of extra info as possible to create a knowledge base)
+run 1 gds algo regardless of being meaningful
+kg analysis+brainstorming 19-23
 
-unified persons into KG + 2 presidential era KG construction 10.30-12.30
-cypher exemplary queries via reaching KG from python(bump chart) 13.30-15.30
-node embeddings from gds + doc2vec + bump chart as proof of concept 18.30-22
-readings + think on nlp + gds application on our KG specifically 22-23.30
-
-jan 16
-meeting
-read on importing wikidata into neo4j for Country
-slide + overleaf notes
-
-
+think of persons and countries and their information extracted from wikidata+embeddings already a complete projection of real world
+where the additional insight will be given by frus
+trying the understand relationships with semantics
+creative day full of analysis (cypher, plots, algos)
 
 
+redactions
+nb -> py
+replace abbr within text with full
 
-improvements on city matching:
+
+readings:
+1-nlp readings
+2-social readings
+
+brainstorming:
+1-think on interesting research questions
+2-think on overleaf + paper notes
+3-think on nlp + gds application on our KG specifically
+4-think on pure nlp for analysis
+
+keyword extraction?
+using person, country, institution descriptions from wikipedia ?
+WHY DOES KG STAY THERE IF WE CAN USE ONLY NLP? answer this! -> for using GDS
+sentence or paragraph level semantics and their projection and evaluation in space ?
+event 
+https://spacy.io/usage/linguistic-features#entity-linking
+emotion detection
+ner, NORP, ORG
+
+#todo
+node embeddings from gds + doc2vec + bump chart as proof of concept
+entity linking, then person->political view
+co-reference resolution?
+source requires more processing
+handle person who are not annotated with persName tag
+
+rebel: entity and relation extraction -> https://github.com/Babelscape/rebel
+extend: entity linking (disambiguation) -> https://github.com/SapienzaNLP/extend
+blink: entity linking (disambiguation, wikification) -> https://github.com/facebookresearch/BLINK
+another entity linking -> https://github.com/egerber/spaCy-entity-linker
+
+
++improvements on city matching:
 first check if capital or big city if not found check human settlement -done
 process cities by batch so San jose can match with san jose, costa rica -todo
 each processed city will be base for upcoming ones -todo
@@ -30,22 +66,10 @@ consider having countryLabel and countryTag in a separate df for all countries
 Republic of Vietnam and vietnam
 ireland and republic of ireland
 
-readings
-
-improvements on person matching:
++improvements on person matching:
 matching more with sentence similarity, also reducing multi wiki matches with sentence similarity
 if same name person appear more than one, select the one with most occurances!
 
-read more on entity extraction from survey
-entity linking, then person->political view
-named entity recognition
-co-reference resolution?
-
-#challenges
-personId is unique within volume, not series: think on how to merge series-wide
-handle person who are not annotated with persName tag
-how to get instution names
-source requires more processing
 
 #design
 for person_mentioned, included all persName tags regardless of in title, text, or closer except ones within note tag
