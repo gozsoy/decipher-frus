@@ -6,22 +6,17 @@ DONE- unified persons into KG + 2 presidential era KG construction
 DONE- read on importing wikidata into neo4j for Country
 DONE-texts -> sql, sql id -> KG
 
-feb 2
-topic modeling 9-12.30 topics over time +keybert + lda possibilities again!
-topic semantics should be continous not discrete
-wikidata extraction for kg expansion 13.30-17.30 (use as much of extra info as possible to create a knowledge base)
+feb 12
+wikidata extraction, integrate into KG 11-14
+reading
+finding redactions (format etc.) 15-17
+person description clustering 19-22
+
+topic modeling: dynamic topic modelling+ topics over time +keybert + ldavis
 run 1 gds algo regardless of being meaningful
-kg analysis+brainstorming 19-23
 
-think of persons and countries and their information extracted from wikidata+embeddings already a complete projection of real world
-where the additional insight will be given by frus
-trying the understand relationships with semantics
 creative day full of analysis (cypher, plots, algos)
-
-
-redactions
 nb -> py
-replace abbr within text with full
 
 
 readings:
@@ -49,6 +44,9 @@ entity linking, then person->political view
 co-reference resolution?
 source requires more processing
 handle person who are not annotated with persName tag
+threshold on cosine similarities for wikidata matching
+increase cosine similarity threshold for sbert wikidata description match
+replace abbr within text with full
 
 rebel: entity and relation extraction -> https://github.com/Babelscape/rebel
 extend: entity linking (disambiguation) -> https://github.com/SapienzaNLP/extend
