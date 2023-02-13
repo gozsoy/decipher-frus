@@ -26,13 +26,23 @@ ENTITY("Document"):
     ONLY_CREATE_IF_EXISTS(RELATION(document, "FROM", city), 'city'):
 
 
-ENTITY("Person"):
-    NODE("Person") person:
-        + name = Person.name_set
-        - name_list = Person.name_list
-        - id_list = Person.id_list
-        #- description_list = Person.description_list
-        #- bornIn = Person.bornCountry
+ENTITY("Country"):
+    NODE("Country") country:
+        + name = Country.countryLabel
+        - url = Country.countryTag # DO: url -> tag
+#        - capital = Country.capital
+#        - governance = Country.governance
+#        - continent = Country.continent
+#        - region = Country.region
+
+
+ENTITY("CityCountry"):
+    NODE("City") city:
+        + name = CityCountry.name
+        - name_list = CityCountry.name_list
+    ONLY_CREATE_IF_EXISTS(NODE("Country"), 'country') country:
+        + name = CityCountry.country
+    ONLY_CREATE_IF_EXISTS(RELATION(city, "LOCATED_IN", country), 'country'):
 
 
 ENTITY("Year"):
@@ -53,6 +63,18 @@ ENTITY("Era"):
     RELATION(pe, "ENDED_AT", MATCH("Year", year=INT(Era.endYear))):
 
 
+ENTITY("Person"):
+    NODE("Person") person:
+        + name = Person.name_set
+        - name_list = Person.name_list
+        - id_list = Person.id_list
+        - description_list = Person.description_list
+        - candidate_wiki_entries = Person.wiki_col
+        - selected_wiki_entity = Person.selected_wiki_entity
+        - gender = Person.gender
+        - religion = Person.religion
+
+
 ENTITY("PersonSentBy"):
     NODE("Person") person:
         + name = PersonSentBy.person_name
@@ -61,12 +83,14 @@ ENTITY("PersonSentBy"):
     RELATION(document, "SENT_BY", person):
         # dateSent = PersonSentBy.dateSent
 
+
 ENTITY("PersonSentTo"):
     NODE("Person") person:
         + name = PersonSentTo.person_name
     NODE("Document") document:
         + docID = PersonSentTo.received
     RELATION(document, "SENT_TO", person):
+
 
 ENTITY("PersonMentionedIn"):
     NODE("Person") person:
@@ -76,25 +100,58 @@ ENTITY("PersonMentionedIn"):
     RELATION(document, "MENTIONED", person):
 
 
-ENTITY("Country"):
+ENTITY("Citizenship"):
+    NODE("Person") person:
+        + name = Citizenship.person_name
     NODE("Country") country:
-        + name = Country.countryLabel
-        - url = Country.countryTag
-#        - capital = Country.capital
-#        - governance = Country.governance
-#        - continent = Country.continent
-#        - region = Country.region
-#    RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
+        + name = Citizenship.country # be careful with historical countries
+    RELATION(person, "CITIZEN_OF", country):
+        - started = Citizenship.startyearLabel
+        - ended = Citizenship.endyearLabel
 
 
-ENTITY("CityCountry"):
-    NODE("City") city:
-        + name = CityCountry.name
-        - name_list = CityCountry.name_list
-    ONLY_CREATE_IF_EXISTS(NODE("Country"), 'country') country:
-        + name = CityCountry.country
-    ONLY_CREATE_IF_EXISTS(RELATION(city, "LOCATED_IN", country), 'country'):
+ENTITY("Occupation"):
+    NODE("Person") person:
+        + name = Occupation.person_name
+    NODE("Occupation") occupation:
+        + name = Occupation.job_name
+        - tag = Occupation.job_tag
+    RELATION(person, "WORKED_AS", occupation):
 
+
+ENTITY("School"):
+    NODE("Person") person:
+        + name = School.person_name
+    NODE("School") school:
+        + name = School.school_name
+        - tag = School.school_tag
+    RELATION(person, "EDUCATED_AT", school):
+    #RELATION(school, "IN", MATCH("Country", name=School.school_country)):
+
+
+ENTITY("PoliticalParty"):
+    NODE("Person") person:
+        + name = PoliticalParty.person_name
+    NODE("PoliticalParty") party:
+        + name = PoliticalParty.party_name
+        - tag = PoliticalParty.party_tag
+        #- ideology
+    RELATION(person, "MEMBER_OF", party):
+        - started = PoliticalParty.startyearLabel
+        - ended = PoliticalParty.endyearLabel
+    #RELATION(party, "IN", MATCH("Country", name=PoliticalParty.party_country)):
+
+
+ENTITY("Role"):
+    NODE("Person") person:
+        + name = Role.person_name
+    NODE("Role") role:
+        + name = Role.role_name
+        - tag = Role.role_tag
+    RELATION(person, "POSITION_HELD", role):
+        - started = Role.startyearLabel
+        - ended = Role.endyearLabel
+    #RELATION(role, "IN", MATCH("Country", name=Role.role_country)):
 
 
 #ENTITY("Instution"):
