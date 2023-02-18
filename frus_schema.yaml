@@ -29,7 +29,7 @@ ENTITY("Document"):
 ENTITY("Country"):
     NODE("Country") country:
         + name = Country.countryLabel
-        - url = Country.countryTag # DO: url -> tag
+        - tag = Country.countryTag
 #        - capital = Country.capital
 #        - governance = Country.governance
 #        - continent = Country.continent
@@ -72,7 +72,6 @@ ENTITY("Person"):
         - candidate_wiki_entries = Person.wiki_col
         - selected_wiki_entity = Person.selected_wiki_entity
         - gender = Person.gender
-        - religion = Person.religion
 
 
 ENTITY("PersonSentBy"):
@@ -102,56 +101,75 @@ ENTITY("PersonMentionedIn"):
 
 ENTITY("Citizenship"):
     NODE("Person") person:
-        + name = Citizenship.person_name
+        + name = Citizenship.name_set
     NODE("Country") country:
-        + name = Citizenship.country # be careful with historical countries
+        + name = Citizenship.info_name # be careful with historical countries
+        - tag = Citizenship.info_tag
     RELATION(person, "CITIZEN_OF", country):
-        - started = Citizenship.startyearLabel
-        - ended = Citizenship.endyearLabel
+        - started = Citizenship.start_year
+        - ended = Citizenship.end_year
 
 
 ENTITY("Occupation"):
     NODE("Person") person:
-        + name = Occupation.person_name
+        + name = Occupation.name_set
     NODE("Occupation") occupation:
-        + name = Occupation.job_name
-        - tag = Occupation.job_tag
+        + name = Occupation.info_name
+        - tag = Occupation.info_tag
     RELATION(person, "WORKED_AS", occupation):
 
 
 ENTITY("School"):
     NODE("Person") person:
-        + name = School.person_name
+        + name = School.name_set
     NODE("School") school:
-        + name = School.school_name
-        - tag = School.school_tag
+        + name = School.info_name
+        - tag = School.info_tag
     RELATION(person, "EDUCATED_AT", school):
     #RELATION(school, "IN", MATCH("Country", name=School.school_country)):
 
 
 ENTITY("PoliticalParty"):
     NODE("Person") person:
-        + name = PoliticalParty.person_name
+        + name = PoliticalParty.name_set
     NODE("PoliticalParty") party:
-        + name = PoliticalParty.party_name
-        - tag = PoliticalParty.party_tag
+        + name = PoliticalParty.info_name
+        - tag = PoliticalParty.info_tag
         #- ideology
     RELATION(person, "MEMBER_OF", party):
-        - started = PoliticalParty.startyearLabel
-        - ended = PoliticalParty.endyearLabel
+        - started = PoliticalParty.start_year
+        - ended = PoliticalParty.end_year
     #RELATION(party, "IN", MATCH("Country", name=PoliticalParty.party_country)):
 
 
 ENTITY("Role"):
     NODE("Person") person:
-        + name = Role.person_name
+        + name = Role.name_set
     NODE("Role") role:
-        + name = Role.role_name
-        - tag = Role.role_tag
+        + name = Role.info_name
+        - tag = Role.info_tag
     RELATION(person, "POSITION_HELD", role):
-        - started = Role.startyearLabel
-        - ended = Role.endyearLabel
+        - started = Role.start_year
+        - ended = Role.end_year
     #RELATION(role, "IN", MATCH("Country", name=Role.role_country)):
+
+
+ENTITY("Religion"):
+    NODE("Person") person:
+        + name = Religion.name_set
+    NODE("Religion") religion:
+        + name = Religion.info_name
+        - tag = Religion.info_tag
+    RELATION(person, "BELIEVED", religion):
+
+
+ENTITY("Redaction"):
+    NODE("Document") document:
+        + docID = Redaction.id_to_text
+    NODE("Redaction") redaction:
+        + text = Redaction.text
+        - amount = Redaction.amount
+    RELATION(document, "REDACTED", redaction):
 
 
 #ENTITY("Instution"):
