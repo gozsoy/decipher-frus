@@ -5,16 +5,34 @@ DONE- fetch country url's and unify country names
 DONE- unified persons into KG + 2 presidential era KG construction
 DONE- read on importing wikidata into neo4j for Country
 DONE-texts -> sql, sql id -> KG
+DONE-wikidata extra information
+DONE-finding redactions (format etc.), integrate KG
 
-feb 12
-wikidata extraction, integrate into KG 11-14
-reading
-finding redactions (format etc.) 15-17
-person description clustering 19-22
+feb 22
+dynamic topic modelling + insert topics into KG 9-12
+run pagerank 13-15
+columbia ner 15-16
+keyword+named entity node embeddings 20-23
 
-topic modeling: dynamic topic modelling+ topics over time +keybert + ldavis
-run 1 gds algo regardless of being meaningful
+simple aspect based sentiment analysis
 
+
+
+reading after meeting
+
+using several levels of topics as assigned to a document (general -> specific)
+extract some keywords as well using keybert
+get texts directly from text_69_76.db
+
+promising low hanging fruits:
+simple aspect based sentiment analysis
+keyword+named entity KG projection with node2vec on top
+
+person description clustering ??
+named entity extraction combined with topic modeling
+
+
+add family members, party school country, party ideology
 creative day full of analysis (cypher, plots, algos)
 nb -> py
 
@@ -39,9 +57,11 @@ emotion detection
 ner, NORP, ORG
 
 #todo
+including the sentence of paragraph redaction is in OR extracting amount of redaction
+how to handle histroical countries? 
 node embeddings from gds + doc2vec + bump chart as proof of concept
 entity linking, then person->political view
-co-reference resolution?
+co-reference resolution? neuralcoref by huggingface
 source requires more processing
 handle person who are not annotated with persName tag
 threshold on cosine similarities for wikidata matching
@@ -67,6 +87,7 @@ ireland and republic of ireland
 +improvements on person matching:
 matching more with sentence similarity, also reducing multi wiki matches with sentence similarity
 if same name person appear more than one, select the one with most occurances!
+warning: ahmed ben saleh X ahmed ben bella
 
 
 #design
