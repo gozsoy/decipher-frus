@@ -7,18 +7,21 @@ DONE- read on importing wikidata into neo4j for Country
 DONE-texts -> sql, sql id -> KG
 DONE-wikidata extra information
 DONE-finding redactions (format etc.), integrate KG
+DONE-dynamic topic modelling
+DONE-insert topics into KG use analysis.ipynb for this
 
 feb 22
-dynamic topic modelling + insert topics into KG 9-12
-run pagerank 13-15
-columbia ner 15-16
-keyword+named entity node embeddings 20-23
+run on updated KG pagerank (centrality), louvain(community) 13-15 EXPERIMENT 1
+keyword+named entity+(topics?) node embeddings 20-23 EXPERIMENT 2 + use columbia ner for this
 
+
+feb 23
+lda topic modeling
 simple aspect based sentiment analysis
+add family members, party school country, party ideology
 
-
-
-reading after meeting
+feb 24
+reading after meeting, lda
 
 using several levels of topics as assigned to a document (general -> specific)
 extract some keywords as well using keybert
@@ -32,7 +35,7 @@ person description clustering ??
 named entity extraction combined with topic modeling
 
 
-add family members, party school country, party ideology
+
 creative day full of analysis (cypher, plots, algos)
 nb -> py
 

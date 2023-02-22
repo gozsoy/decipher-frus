@@ -172,6 +172,20 @@ ENTITY("Redaction"):
     RELATION(document, "REDACTED", redaction):
 
 
+ENTITY("Topic"):
+    NODE("Topic") topic:
+        + name = Topic.Name
+        - description = Topic.Top_n_words
+
+
+ENTITY("DocTopic"):
+    NODE("Document") document:
+        + docID = DocTopic.id_to_text
+    NODE("Topic") topic:
+        + name = DocTopic.assigned_topic
+    RELATION(document, "ABOUT", topic):
+    
+
 #ENTITY("Instution"):
 #    NODE("Instution") inst:
 #        + id = INT(Instution.id)
