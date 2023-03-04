@@ -1,0 +1,62 @@
+# redaction analysis
+
+Q. Which topics have highest amount of redaction (sum of redacted lines) ?
+match (d:Document)-[:REDACTED]-(r:Redaction)
+where r.type = 'line' and isNan(r.amount)=False
+with d, sum(r.amount) as r_amount
+match (t:Topic)-[:ABOUT]-(d)
+return t.description, count(d.docID) as doc_count, sum(r_amount) as tot_amount
+order by tot_amount desc
+limit 20
+
+Q. Which topics have highest count of redaction ?
+match (d:Document)-[:REDACTED]-(r:Redaction)
+with d, count(r) as r_count
+match (t:Topic)-[:ABOUT]-(d)
+return t.description, count(d.docID) as doc_count, sum(r_count) as tot_count,  sum(r_count)/count(d.docID) as tot_count_per_doc
+order by tot_count_per_doc desc
+limit 20
+
+Q. Which topics have highest count of 'dollar amount' redaction ? (also 'name')
+match (d:Document)-[:REDACTED]-(r:Redaction)
+where r.type = 'dollaramount'
+with d, count(r) as r_count
+match (t:Topic)-[:ABOUT]-(d)
+return t.description, count(d) as doc_count, sum(r_count) as tot_count, sum(r_count)/count(d) as tot_count_per_doc
+order by tot_count desc
+limit 20
+
+Q. Who has highest number of redaction count in documents s/he sent ? 
+match (d:Document)-[:REDACTED]-(r:Redaction)
+with d, count(r) as r_count
+match (p:Person)-[:SENT_BY]-(d)
+return p.name, count(d) as doc_count, sum(r_count) as tot_count, sum(r_count)/count(d) as tot_count_per_doc
+order by tot_count desc
+limit 20
+
+Q. Who has highest average redaction amount (redacted lines) in documents s/he sent ?
+match (d:Document)-[:REDACTED]-(r:Redaction)
+where r.type = 'line' and isNan(r.amount)=False
+with d, sum(r.amount) as r_amount
+match (p:Person)-[:SENT_BY]-(d)
+return p.name, count(d.docID) as doc_count, sum(r_amount) as tot_amount, sum(r_amount)/count(d.docID) as tot_amount_per_doc
+order by tot_amount_per_doc desc
+limit 20
+
+Q. Which president has highest count of redaction ?
+match (d:Document)-[:REDACTED]-(r:Redaction)
+with d, count(r) as r_count
+match (e:PresidentialEra)-[:DURING]-(d)
+return e.name, count(d.docID) as doc_count, sum(r_count) as tot_count, sum(r_count)/count(d.docID) as tot_count_per_doc
+order by tot_count desc
+limit 20
+
+Q. Which country has highest number of redaction count ?
+match (d:Document)-[:REDACTED]-(r:Redaction)
+with d, count(r) as r_count
+match (d)-[:FROM]-(:City)-[:LOCATED_IN]-(c:Country)
+return c.name, count(d.docID) as doc_count, sum(r_count) as tot_count, sum(r_count)/count(d.docID) as tot_count_per_doc
+order by tot_count desc
+limit 20 
+
+Q. Who has been mentioned most in documents with redactions ?
