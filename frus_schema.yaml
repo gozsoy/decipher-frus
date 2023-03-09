@@ -45,6 +45,14 @@ ENTITY("CityCountry"):
     ONLY_CREATE_IF_EXISTS(RELATION(city, "LOCATED_IN", country), 'country'):
 
 
+ENTITY("CountryMentionedIn"):
+    NODE("Document") document:
+        + docID = CountryMentionedIn.id_to_text
+    NODE("Country") country:
+        + name = CountryMentionedIn.countryLabel
+    RELATION(document, "MENTIONED", country):
+
+
 ENTITY("Year"):
     NODE("Year") year:
         + year = INT(Year.year)
@@ -126,7 +134,7 @@ ENTITY("School"):
         + name = School.info_name
         - tag = School.info_tag
     RELATION(person, "EDUCATED_AT", school):
-    #RELATION(school, "IN", MATCH("Country", name=School.school_country)):
+    RELATION(school, "IN", MATCH("Country", name=School.country)):
 
 
 ENTITY("PoliticalParty"):
@@ -139,7 +147,7 @@ ENTITY("PoliticalParty"):
     RELATION(person, "MEMBER_OF", party):
         - started = PoliticalParty.start_year
         - ended = PoliticalParty.end_year
-    #RELATION(party, "IN", MATCH("Country", name=PoliticalParty.party_country)):
+    RELATION(party, "IN", MATCH("Country", name=PoliticalParty.country)):
 
 
 ENTITY("Role"):
@@ -167,8 +175,11 @@ ENTITY("Redaction"):
     NODE("Document") document:
         + docID = Redaction.id_to_text
     NODE("Redaction") redaction:
-        + text = Redaction.text
-        - amount = Redaction.amount
+        + redaction_id = INT(Redaction.redaction_id)
+        - raw_text = Redaction.raw_text
+        - detected_chunks = Redaction.detected_chunks
+        - type = Redaction.type_col
+        - amount = FLOAT(Redaction.amount_col)  # float|None
     RELATION(document, "REDACTED", redaction):
 
 

@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
 
     # Configure Logging
-    '''import logging
+    import logging
 
     #logging.basicConfig(filename='tables/rel2graphlogs.log',level=logging.WARNING)
     logger = logging.getLogger("rel2graph")
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     log_formatter = logging.Formatter("%(asctime)s [%(threadName)s]::[%(levelname)s]::%(filename)s: %(message)s")
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(log_formatter)
-    logger.addHandler(console_handler)'''
+    logger.addHandler(console_handler)
 
 
     import sqlite3
@@ -53,14 +53,14 @@ if __name__ == "__main__":
     sqllite_handler.init(rdb_name)
 
 
-    #doc_df = pd.read_csv('tables/doc_69_76.csv') #VALID ONE
-    doc_df = pd.read_csv('tables/doc_69_76v30.csv') # EXPERIMENTAL PURPOSES
+    doc_df = pd.read_csv('tables/doc_69_76.csv') #VALID ONE
 
     # change year from type 'float' to 'str(int)' suitable for rel2graph
     doc_df['year'] = doc_df['year'].apply(lambda x: x if math.isnan(x) else str(int(x)))
 
     country_df = pd.read_csv('tables/country_69_76.csv')
     city_country_df = pd.read_parquet('tables/city_69_76_final.parquet')
+    country_mentioned_df = pd.read_csv('tables/country_mentioned_69_76.csv')
 
     era_df = pd.read_csv('tables/era.csv')
     year_df = pd.read_csv('tables/year.csv')
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     person_df = pd.read_parquet('tables/new_unified_person_df_final.parquet')
     person_sentby_df = pd.read_csv('tables/person_sentby_69_76.csv')
     person_sentto_df = pd.read_csv('tables/person_sentto_69_76.csv')
-    #person_mentioned_df = pd.read_csv('tables/person_mentioned_single_volume.csv')
+    person_mentioned_df = pd.read_csv('tables/person_mentioned_69_76.csv')
 
     religion_df = pd.read_parquet('tables/person_religion_69_76.parquet')
     citizenship_df = pd.read_parquet('tables/person_citizenship_69_76.parquet')
@@ -82,8 +82,8 @@ if __name__ == "__main__":
     doc_topic_df = pd.read_csv('tables/doc_topic_69_76.csv')
 
 
-    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='neo4j')
-    #graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frusphase2')
+    #graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='neo4j')
+    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frusphase2')
 
     graph.delete_all()  # reset graph (only when first creating the databse, here for debugging purposes)
 
@@ -134,27 +134,28 @@ if __name__ == "__main__":
 
 
     iterator = IteratorIterator([PandasDataframeIterator(doc_df, "Document"), 
-                                #PandasDataframeIterator(era_df, "Era"), 
-                                #PandasDataframeIterator(person_df, "Person"),
-                                #PandasDataframeIterator(year_df, "Year"),
-                                #PandasDataframeIterator(person_sentby_df, "PersonSentBy"),
-                                #PandasDataframeIterator(person_sentto_df, "PersonSentTo"),
-                                #PandasDataframeIterator(person_mentioned_df, "PersonMentionedIn"),
-                                #PandasDataframeIterator(country_df, "Country"),
-                                #PandasDataframeIterator(city_country_df, "CityCountry"),
-                                #PandasDataframeIterator(religion_df, "Religion"),
-                                #PandasDataframeIterator(occupation_df, "Occupation"),
-                                #PandasDataframeIterator(political_party_df, "PoliticalParty"),
-                                #PandasDataframeIterator(role_df, "Role"),
-                                #PandasDataframeIterator(school_df, "School"),
-                                #PandasDataframeIterator(citizenship_df, "Citizenship"),
-                                #PandasDataframeIterator(redaction_df, "Redaction"),
-                                #PandasDataframeIterator(topic_desc_df, "Topic"),
-                                #PandasDataframeIterator(doc_topic_df, "DocTopic"),
+                                PandasDataframeIterator(era_df, "Era"), 
+                                PandasDataframeIterator(person_df, "Person"),
+                                PandasDataframeIterator(year_df, "Year"),
+                                PandasDataframeIterator(person_sentby_df, "PersonSentBy"),
+                                PandasDataframeIterator(person_sentto_df, "PersonSentTo"),
+                                PandasDataframeIterator(person_mentioned_df, "PersonMentionedIn"),
+                                PandasDataframeIterator(country_df, "Country"),
+                                PandasDataframeIterator(city_country_df, "CityCountry"),
+                                PandasDataframeIterator(country_mentioned_df, "CountryMentionedIn"),
+                                PandasDataframeIterator(religion_df, "Religion"),
+                                PandasDataframeIterator(occupation_df, "Occupation"),
+                                PandasDataframeIterator(political_party_df, "PoliticalParty"),
+                                PandasDataframeIterator(role_df, "Role"),
+                                PandasDataframeIterator(school_df, "School"),
+                                PandasDataframeIterator(citizenship_df, "Citizenship"),
+                                PandasDataframeIterator(redaction_df, "Redaction"),
+                                PandasDataframeIterator(topic_desc_df, "Topic"),
+                                PandasDataframeIterator(doc_topic_df, "DocTopic"),
                                 ])
 
 
-    converter = Converter(load_file(filename), iterator, graph, num_workers=1)
+    converter = Converter(load_file(filename), iterator, graph, num_workers=13)
 
 
     converter()
