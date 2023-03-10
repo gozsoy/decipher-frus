@@ -53,7 +53,7 @@ if __name__ == "__main__":
     sqllite_handler.init(rdb_name)
 
 
-    doc_df = pd.read_csv('tables/doc_69_76.csv') #VALID ONE
+    doc_df = pd.read_csv('tables/doc_69_76.csv')
 
     # change year from type 'float' to 'str(int)' suitable for rel2graph
     doc_df['year'] = doc_df['year'].apply(lambda x: x if math.isnan(x) else str(int(x)))
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     country_mentioned_df = pd.read_csv('tables/country_mentioned_69_76.csv')
 
     era_df = pd.read_csv('tables/era.csv')
-    year_df = pd.read_csv('tables/year.csv')
+    #year_df = pd.read_csv('tables/year.csv') removed as not functional
 
     person_df = pd.read_parquet('tables/new_unified_person_df_final.parquet')
     person_sentby_df = pd.read_csv('tables/person_sentby_69_76.csv')
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     iterator = IteratorIterator([PandasDataframeIterator(doc_df, "Document"), 
                                 PandasDataframeIterator(era_df, "Era"), 
                                 PandasDataframeIterator(person_df, "Person"),
-                                PandasDataframeIterator(year_df, "Year"),
+                                #PandasDataframeIterator(year_df, "YearTable"), removed
                                 PandasDataframeIterator(person_sentby_df, "PersonSentBy"),
                                 PandasDataframeIterator(person_sentto_df, "PersonSentTo"),
                                 PandasDataframeIterator(person_mentioned_df, "PersonMentionedIn"),
@@ -164,3 +164,4 @@ if __name__ == "__main__":
     sqllite_handler.quit()
     #logging.shutdown()
     print('done')
+    sys.exit()

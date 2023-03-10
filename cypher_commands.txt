@@ -60,3 +60,28 @@ order by tot_count desc
 limit 20 
 
 Q. Who has been mentioned most in documents with redactions ?
+
+
+# role centrality analysis
+
+1
+match (p1:Person)-[:MENTIONED]-(d:Document)-[:MENTIONED]-(p2:Person)
+match (r1:Role)-[:POSITION_HELD]-(p1)
+match (r2:Role)-[:POSITION_HELD]-(p2)
+where r1<>r2
+merge (r1)-[re:NEIGHBOR]-(r2)
+return re
+limit 10
+
+2
+call gds.graph.project('only_roles_69_76',
+'Role',
+{NEIGHBOR:{orientation:'UNDIRECTED'}})
+YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount, projectMillis
+
+3
+CALL gds.pageRank.stream('only_roles_69_76')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC
+limit 100

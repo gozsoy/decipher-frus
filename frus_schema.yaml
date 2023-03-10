@@ -24,6 +24,7 @@ ENTITY("Document"):
     RELATION(document, "INSTANCE_OF", volume):
     ONLY_CREATE_IF_EXISTS(RELATION(document, "STORED", source), 'source'):
     ONLY_CREATE_IF_EXISTS(RELATION(document, "FROM", city), 'city'):
+    RELATION(document, "DURING", MATCH("PresidentialEra", name=Document.era)):
 
 
 ENTITY("Country"):
@@ -53,10 +54,11 @@ ENTITY("CountryMentionedIn"):
     RELATION(document, "MENTIONED", country):
 
 
-ENTITY("Year"):
-    NODE("Year") year:
-        + year = INT(Year.year)
-    RELATION(MATCH("Document", year=INT(Year.year)), "DATED", year):
+# removed because it is redundant
+#ENTITY("YearTable"):
+#    NODE("Year") year_object:
+#        + year = INT(YearTable.year)
+#    RELATION(MATCH("Document", year=INT(YearTable.year)), "DATED", year_object):
 
 
 ENTITY("Era"):
@@ -66,9 +68,8 @@ ENTITY("Era"):
         - endDate = AUX(Era.endDate)
         - startYear = INT(Era.startYear)
         - endYear = INT(Era.endYear)
-    RELATION(MATCH("Document", era=Era.president), "DURING", pe):
-    RELATION(pe, "STARTED_AT", MATCH("Year", year=INT(Era.startYear))):
-    RELATION(pe, "ENDED_AT", MATCH("Year", year=INT(Era.endYear))):
+    #RELATION(pe, "STARTED_AT", MATCH("Year", year=INT(Era.startYear))):
+    #RELATION(pe, "ENDED_AT", MATCH("Year", year=INT(Era.endYear))):
 
 
 ENTITY("Person"):

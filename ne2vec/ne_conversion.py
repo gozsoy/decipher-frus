@@ -25,9 +25,9 @@ if __name__ == "__main__":
 
     filename = "ne_schema.yaml"
 
-    ne2doc_df = pd.read_parquet('ne2doc_df.parquet')
+    ne2doc_df = pd.read_parquet('ne2doc_df.parquet') # CHANGE PATH
 
-    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='entity2vec')
+    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='entity2vec2') # CHANGE NAME
 
     graph.delete_all()
 
