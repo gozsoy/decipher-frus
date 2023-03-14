@@ -12,58 +12,53 @@ from sklearn.manifold import TSNE
 from sentence_transformers import SentenceTransformer
 from keybert import KeyBERT
 import os.path
+import math
 
 nlp = spacy.load('en_core_web_sm')
 
-USE_EMBEDDINGS = True
+USE_EMBEDDINGS = False # because remove entities and compute embeddings again
 USE_KEYBERT = False
+name_extension = '_69_76_entremoved'
 
-def remove_persons(txt):
+def remove_entities(txt):
     document = nlp(txt)
 
     edited_txt = ""
-    for ent in document:
+    for token in document:
         
-        if ent.ent_type_=='PERSON':
-            if ent.whitespace_:
-                edited_txt += 'Person'+ ' '
+        if token.ent_iob_=='O':
+            if token.whitespace_:
+                edited_txt += token.text+ ' '
             else:
-                edited_txt += 'Person'
-        else:
-            if ent.whitespace_:
-                edited_txt += ent.text+ ' '
-            else:
-                edited_txt += ent.text
+                edited_txt += token.text
     
     return edited_txt
 
 # PRECOMPUTE EMBEDDINGS
 if not USE_EMBEDDINGS:
 
-    conn = sqlite3.connect('tables/texts_69_76.db')
-    cur = conn.cursor()
+    doc_df = pd.read_csv('tables/doc_69_76.csv')
+    free_text_list = doc_df['text'].values
+    free_text_list = list(map(lambda x: ' ' if not x or (isinstance(x, float) and math.isnan(x)) else x, free_text_list))
 
-    res = cur.execute("SELECT TEXT FROM transcript")
-    fetched = res.fetchall()
-    free_text_list = list(map(lambda x: x[0], fetched))
-    #free_text_list = list(map(lambda x: remove_persons(x), free_text_list))
+    free_text_list = list(map(lambda x: remove_entities(x), free_text_list))
+    print('entities removed from free texts.')
 
-    with open("plots/free_text_list", "wb") as fp:
+    with open("plots/free_text_list"+name_extension, "wb") as fp:
         pickle.dump(free_text_list, fp)
-    free_text_list = list(map(lambda x: ' ' if not x else x, free_text_list))
 
     # prepare embeddings beforehand
     sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
     embeddings = sentence_model.encode(free_text_list, show_progress_bar=True)
-    np.save('plots/embeddings_69_76.npy',embeddings)
+    np.save('plots/embeddings'+name_extension+'.npy',embeddings)
     print('embeddings computed from scratch.')
 
 else:
-    with open("plots/free_text_list", "rb") as fp:
+    with open("plots/free_text_list"+name_extension, "rb") as fp:
         free_text_list = pickle.load(fp)
 
     free_text_list = list(map(lambda x: ' ' if not x else x, free_text_list))
-    embeddings = np.load('plots/embeddings_69_76.npy')
+    embeddings = np.load('plots/embeddings'+name_extension+'.npy')
     print('embeddings loaded.')
 
 
@@ -83,14 +78,14 @@ if USE_KEYBERT:
         vocabulary = [k[0] for keyword in keywords for k in keyword]
         vocabulary = list(set(vocabulary))
 
-        with open("plots/keybert_vocabulary", "wb") as fp:
+        with open("plots/keybert_vocabulary"+name_extension, "wb") as fp:
             pickle.dump(vocabulary, fp)
 
     vectorizer_model = CountVectorizer(vocabulary=vocabulary)
     
     
 else:
-    vectorizer_model = CountVectorizer(stop_words=text.ENGLISH_STOP_WORDS.union(['Person','person']), ngram_range=(1,2))
+    vectorizer_model = CountVectorizer(stop_words=text.ENGLISH_STOP_WORDS, ngram_range=(1,2))
 
 
 # FIT TOPIC MODEL
@@ -106,8 +101,8 @@ topics, probs = topic_model.fit_transform(free_text_list,embeddings)
 print('topic model fit transform done.')
 #topics = topic_model.reduce_outliers(free_text_list, topics)
 #print('topics outliers reduced. visualization process starting...')
-topic_model.reduce_topics(free_text_list, 'auto')
-print('topics reduced. visualization process starting...')
+#topic_model.reduce_topics(free_text_list, 'auto')
+#print('topics reduced. visualization process starting...')
 
 
 # VISUALIZATION
@@ -120,33 +115,33 @@ nr_bins = len(np.unique(timestamps))
 topics_over_time = topic_model.topics_over_time(free_text_list, timestamps, nr_bins=nr_bins)
 
 fig = topic_model.visualize_topics_over_time(topics_over_time, top_n_topics=15)
-fig.write_html("plots/topics_over_time_69_76.html")"""
+fig.write_html("plots/topics_over_time"+name_extension+".html")"""
 
 
 fig = topic_model.visualize_barchart(topics=np.unique(topic_model.topics_),n_words=7)
-fig.write_html("plots/word_importance_per_topic_69_76.html")
+fig.write_html("plots/word_importance_per_topic"+name_extension+".html")
 
 fig = topic_model.visualize_documents(docs=free_text_list,embeddings=embeddings)
-fig.write_html("plots/umap_document_embeddings_69_76.html")
+fig.write_html("plots/umap_document_embeddings"+name_extension+".html")
 
 '''reduced_embeddings = TSNE(n_components=2, learning_rate='auto',
                   init='random', perplexity=3).fit_transform(embeddings)
 fig = topic_model.visualize_documents(docs=free_text_list,reduced_embeddings=reduced_embeddings)
-fig.write_html("plots/tsne_document_embeddings_69_76.html")'''
+fig.write_html("plots/tsne_document_embeddings"+name_extension+".html")'''
 
 fig = topic_model.visualize_topics()
-fig.write_html("plots/topic_embeddings_69_76.html")
+fig.write_html("plots/topic_embeddings"+name_extension+".html")
 
 fig = topic_model.visualize_heatmap()
-fig.write_html("plots/topic_similarity_heatmap_69_76.html")
+fig.write_html("plots/topic_similarity_heatmap"+name_extension+".html")
 
 #hierarchical_topics = topic_model.hierarchical_topics(free_text_list)
 fig = topic_model.visualize_hierarchy()#hierarchical_topics=hierarchical_topics)
-fig.write_html("plots/topic_hierarchy_69_76.html")
+fig.write_html("plots/topic_hierarchy"+name_extension+".html")
 print('visualization process finished.')
 
 
 #save model
-topic_model.save("plots/topic_model_69_76", save_embedding_model=False)
+topic_model.save("plots/topic_model"+name_extension, save_embedding_model=False)
 
 
