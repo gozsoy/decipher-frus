@@ -2,7 +2,7 @@ import pandas as pd
 from keybert import KeyBERT
 from keyphrase_vectorizers import KeyphraseCountVectorizer
 
-doc_df = pd.read_csv('tables/doc_69_76v30.csv')
+doc_df = pd.read_csv('tables/doc_69_76.csv')
 txt_list = doc_df['text'].values
 
 

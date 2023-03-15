@@ -1,0 +1,47 @@
+ENTITY("Person"):
+    NODE("Person") person:
+        + id = Person.id
+        - name = Person.name
+        - description = Person.description
+        #- bornIn = Person.bornCountry
+    #RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
+    #RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
+    #RELATION(MATCH("Document", personMentioned=Person.id), "MENTIONED", person):
+
+
+ENTITY("Year"):
+    NODE("Year") year:
+        + year = INT(Year.year)
+    #RELATION(MATCH("Document", year=Year.year), "DATED", year):
+
+
+ENTITY("Era"):
+    NODE("PresidentialEra") pe:
+        + president = Era.president
+        - startDate = AUX(Era.startDate)
+        - endDate = AUX(Era.endDate)
+        - startYear = INT(Era.startYear)
+        - endYear = INT(Era.endYear)
+    #RELATION(MATCH("Volume", era=Era.president), "DURING", pe):
+    RELATION(MATCH("Year", year=INT(Era.startYear)), "STARTED_AT", pe):
+    RELATION(MATCH("Year", year=INT(Era.endYear)), "ENDED_AT", pe):
+
+
+#ENTITY("Country"):
+#    NODE("Country") country:
+#        + name = Country.name
+#        - capital = Country.capital
+#        - governance = Country.governance
+#        - continent = Country.continent
+#        - region = Country.region
+#    RELATION(MATCH("City", country=Country.name), "LOCATED_IN", country):
+#    RELATION(country, "BORN_IN", MATCH("Person", bornIn=Country.name)):
+
+
+#ENTITY("Instution"):
+#    NODE("Instution") inst:
+#        + id = INT(Instution.id)
+#        - name = Instution.name
+#        - description = Instution.description
+#    RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
+#    RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):

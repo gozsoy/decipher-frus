@@ -1,65 +1,48 @@
-DONE-initial kg construction
-DONE-make sure person sent to list values can map to person nodes
-DONE- city match. how to automatize? finish processing for 2 era
-DONE- fetch country url's and unify country names
-DONE- unified persons into KG + 2 presidential era KG construction
-DONE- read on importing wikidata into neo4j for Country
-DONE-texts -> sql, sql id -> KG
-DONE-wikidata extra information
-DONE-finding redactions (format etc.), integrate KG
-DONE-dynamic topic modelling
-DONE-insert topics into KG use analysis.ipynb for this
+15 march (while colab experiments running)
+DONE- dynamic ne2vec (skeleton code)
+increase KG (nb -> py)
+readings & brainstorming hugely: spread info, avoid document dominance
 
-feb 22
-run on updated KG pagerank (centrality), louvain(community) 13-15 EXPERIMENT 1
-keyword+named entity+(topics?) node embeddings 20-23 EXPERIMENT 2 + use columbia ner for this
+16 march
+add ne and their sentiment to KG -only using sentiments for ne that will be used in ne2vec?-
+mix dynamic embeddings with topic modeling  (skeleton code)  
+
+obtain instutions from frus -do it before meeting-
 
 
-feb 23
-lda topic modeling
-simple aspect based sentiment analysis
-add family members, party school country, party ideology
-
-feb 24
-reading after meeting, lda
-
-using several levels of topics as assigned to a document (general -> specific)
-extract some keywords as well using keybert
-get texts directly from text_69_76.db
-
-promising low hanging fruits:
-simple aspect based sentiment analysis
-keyword+named entity KG projection with node2vec on top
-
-person description clustering ??
-named entity extraction combined with topic modeling
+some results about ultimate goals before historian meeting
+creative day full of analysis
 
 
+mechanics: nb -> py, add family members
+-rename analysis.py to topic_extraction.py
+-transfer doc topic info merging in analysis.ipynb to analysis.py
+-rename analysis.ipynb to scratch.ipynb
+-rename city_eda.ipynb to city_country_extraction.py
 
-creative day full of analysis (cypher, plots, algos)
-nb -> py
 
+-relocate all files under src folder
 
-readings:
-1-nlp readings
-2-social readings
+ultimate goals: movement of persons (person importance over time), allies/enemies of countries
 
-brainstorming:
+readings:social, nlp
+
+brainstorming 1:
 1-think on interesting research questions
 2-think on overleaf + paper notes
 3-think on nlp + gds application on our KG specifically
 4-think on pure nlp for analysis
 
-keyword extraction?
-using person, country, institution descriptions from wikipedia ?
-WHY DOES KG STAY THERE IF WE CAN USE ONLY NLP? answer this! -> for using GDS
-sentence or paragraph level semantics and their projection and evaluation in space ?
-event 
-https://spacy.io/usage/linguistic-features#entity-linking
-emotion detection
-ner, NORP, ORG
-
-#todo
+brainstorming 2:
+start using edge weight (similarity measure, sentiment)?
+only include countries for the sentiment analysis?
+which topics turkey mentioned in over time? greece -> saudi arabia e.g.(for which topics countries become closer? add sentiment?)
+political word embeddings type named entity embeddings
+merge keywords with ne but this time not on countvectorizer for ke
+adding keywords to KG as well (meaningful keywords from phrase extractor), store their embeddings as well where edge weight is mutual similarity
+adding named entities to KG as well
+adding document/paragraph sentiment to KG as well
+adding sentiments to kg for 2nd goal?
 including the sentence of paragraph redaction is in OR extracting amount of redaction
 how to handle histroical countries? 
 node embeddings from gds + doc2vec + bump chart as proof of concept
@@ -70,28 +53,8 @@ handle person who are not annotated with persName tag
 threshold on cosine similarities for wikidata matching
 increase cosine similarity threshold for sbert wikidata description match
 replace abbr within text with full
-
-rebel: entity and relation extraction -> https://github.com/Babelscape/rebel
-extend: entity linking (disambiguation) -> https://github.com/SapienzaNLP/extend
-blink: entity linking (disambiguation, wikification) -> https://github.com/facebookresearch/BLINK
-another entity linking -> https://github.com/egerber/spaCy-entity-linker
-
-
-+improvements on city matching:
-first check if capital or big city if not found check human settlement -done
-process cities by batch so San jose can match with san jose, costa rica -todo
-each processed city will be base for upcoming ones -todo
-watch out Santiago	Dominican Republic -todo
-Sofia,Madagascar -done
-consider having countryLabel and countryTag in a separate df for all countries
-Republic of Vietnam and vietnam
-ireland and republic of ireland
-
-+improvements on person matching:
-matching more with sentence similarity, also reducing multi wiki matches with sentence similarity
-if same name person appear more than one, select the one with most occurances!
-warning: ahmed ben saleh X ahmed ben bella
-
-
-#design
-for person_mentioned, included all persName tags regardless of in title, text, or closer except ones within note tag
+using person, country, institution descriptions from wikipedia ?
+sentence or paragraph level semantics and their projection and evaluation in space ?
+event 
+https://spacy.io/usage/linguistic-features#entity-lixnking
+emotion detection
