@@ -1,31 +1,44 @@
-15 march (while colab experiments running)
-DONE- dynamic ne2vec (skeleton code)
-increase KG (nb -> py)
-readings & brainstorming hugely: spread info, avoid document dominance
+17 march Fri
+1- increase KG (nb -> py + mechanics) 13-16
+2- dynamic ne2vec for 69_76 2 year bins (proof of concept) 16-16.30
+3- mix dynamic embeddings with topic modeling  (skeleton code) 18.30-19.30
+4- degree centrality some are 0. check it. 20-..
+5- only include roles with start, and year ..-21
+tf developer certificate 21-00
 
-16 march
-add ne and their sentiment to KG -only using sentiments for ne that will be used in ne2vec?-
-mix dynamic embeddings with topic modeling  (skeleton code)  
+18 march Sat
+0- one political paper reading
+1- add ne and their sentiment to KG -only using sentiments for ne that will be used in ne2vec?-
+2- readings & brainstorming hugely: spread info, avoid document dominance
+3- obtain instutions from frus 
+4- dynamic lda
+tf developer certificate 21-00
 
-obtain instutions from frus -do it before meeting-
+19 march Sun
+1- prepare slides
+
+
+
 
 
 some results about ultimate goals before historian meeting
 creative day full of analysis
+sort this page
 
+readings:social, nlp
+ultimate goals: movement of persons (person importance over time), allies/enemies of countries
 
 mechanics: nb -> py, add family members
 -rename analysis.py to topic_extraction.py
 -transfer doc topic info merging in analysis.ipynb to analysis.py
--rename analysis.ipynb to scratch.ipynb
+-rename analysis.ipynb to experiment.ipynb
 -rename city_eda.ipynb to city_country_extraction.py
-
-
+-rename basic_extraction.ipynb to document_extraction.py
+-merge wikidata_querying and person_unify
+-single venv
 -relocate all files under src folder
 
-ultimate goals: movement of persons (person importance over time), allies/enemies of countries
 
-readings:social, nlp
 
 brainstorming 1:
 1-think on interesting research questions
@@ -34,6 +47,7 @@ brainstorming 1:
 4-think on pure nlp for analysis
 
 brainstorming 2:
+country mention count over time graph (simple but meaningful statistics)
 start using edge weight (similarity measure, sentiment)?
 only include countries for the sentiment analysis?
 which topics turkey mentioned in over time? greece -> saudi arabia e.g.(for which topics countries become closer? add sentiment?)
@@ -58,3 +72,5 @@ sentence or paragraph level semantics and their projection and evaluation in spa
 event 
 https://spacy.io/usage/linguistic-features#entity-lixnking
 emotion detection
+
+line 40 white house -> morocco, line 71. line 121, 140, 284, line 507

@@ -85,3 +85,24 @@ YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 limit 100
+
+
+# country community detection (not meaningful as is)
+
+1
+match (c1:Country)-[:MENTIONED]-(d:Document)-[:MENTIONED]-(c2:Country)
+merge (c1)-[re:NEXT]-(c2)
+return re
+limit 10
+
+2
+call gds.graph.project('only_country_69_76',
+'Country',
+{NEXT:{orientation:'UNDIRECTED'}})
+YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount, projectMillis
+
+3
+CALL gds.wcc.stream('only_country_69_76')
+YIELD nodeId, componentId
+with gds.util.asNode(nodeId).name AS name, componentId
+return componentId, collect(name)
