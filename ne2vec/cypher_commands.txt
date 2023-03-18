@@ -2,14 +2,15 @@
 match (e1:Entity)-[:IN]->(d:Document)<-[:IN]-(e2:Entity)
 merge (e1)-[r:NEIGHBOR]-(e2)
 return r
+limit 10
 
 2
-call gds.graph.project('dummy_v30',
+call gds.graph.project('ne2vec_69_76_proj',
 'Entity',
 {NEIGHBOR:{orientation:'UNDIRECTED'}})
 YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount, projectMillis
 
 3
-CALL gds.fastRP.write('dummy_v30', {embeddingDimension: 128, writeProperty: 'fastrp-embedding'})
+CALL gds.fastRP.write('ne2vec_69_76_proj', {embeddingDimension: 128, writeProperty: 'fastrp-embedding'})
 YIELD nodePropertiesWritten
 

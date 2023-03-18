@@ -2,6 +2,6 @@ ENTITY("Doc2Ent"):
     NODE("Document") document:
         + docID  = Doc2Ent.id_to_text
     NODE("Entity") entity:
-        + dynamic_name = Doc2Ent.dynamic_named_entity
-        - name = Doc2Ent.named_entity
+        + name = Doc2Ent.dynamic_named_entity # previous: dynamic_name
+        #- name = Doc2Ent.named_entity
     RELATION(entity, "IN", document):
