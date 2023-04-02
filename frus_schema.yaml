@@ -184,18 +184,76 @@ ENTITY("Redaction"):
     RELATION(document, "REDACTED", redaction):
 
 
-ENTITY("Topic"):
-    NODE("Topic") topic:
-        + name = Topic.Name
-        - description = Topic.Top_n_words
+# Nodes related to topic modeling with Bertopic with named entities
+ENTITY("TopicBertWithEntities"):
+    NODE("TopicBertWithEntities") topic:
+        + name = TopicBertWithEntities.Name
+        - description = TopicBertWithEntities.Top_n_words
 
 
-ENTITY("DocTopic"):
+ENTITY("DocTopicBertWithEntities"):
     NODE("Document") document:
-        + docID = DocTopic.id_to_text
-    NODE("Topic") topic:
-        + name = DocTopic.assigned_topic
+        + docID = DocTopicBertWithEntities.id_to_text
+    NODE("TopicBertWithEntities") topic:
+        + name = DocTopicBertWithEntities.assigned_topic
     RELATION(document, "ABOUT", topic):
+
+
+# Nodes related to topic modeling with Bertopic without named entities
+ENTITY("TopicBertNoEntities"):
+    NODE("TopicBertNoEntities") topic:
+        + name = TopicBertNoEntities.Name
+        - description = TopicBertNoEntities.Top_n_words
+
+
+ENTITY("DocTopicBertNoEntities"):
+    NODE("Document") document:
+        + docID = DocTopicBertNoEntities.id_to_text
+    NODE("TopicBertNoEntities") topic:
+        + name = DocTopicBertNoEntities.assigned_topic
+    RELATION(document, "ABOUT", topic):
+
+
+# Nodes related to topic modeling with LDA without named entities
+ENTITY("TopicLDANoEntities"):
+    NODE("TopicLDANoEntities") topic:
+        + name = TopicLDANoEntities.Name
+        - description = TopicLDANoEntities.Top_n_words
+
+
+ENTITY("DocTopicLDANoEntities"):
+    NODE("Document") document:
+        + docID = DocTopicLDANoEntities.id_to_text
+    NODE("TopicLDANoEntities") topic:
+        + name = DocTopicLDANoEntities.assigned_topic
+    RELATION(document, "ABOUT", topic):
+
+
+ENTITY("EntitySentiment"):
+    NODE("Document") document:
+        + docID = EntitySentiment.id_to_text
+    NODE("NamedEntity") ne:
+        + name = EntitySentiment.named_entity
+    RELATION(document, "HAS_SENTIMENT", ne):
+        - polarity = EntitySentiment.pol
+        - subjectivity = EntitySentiment.sub
+
+
+# change the name manually
+ENTITY("DocDynamicEnt4YearBinned"):
+    NODE("Document") document:
+        + docID  = DocDynamicEnt4YearBinned.id_to_text
+    NODE("DynamicEntity4YearBinned") dne:
+        + name = DocDynamicEnt4YearBinned.dynamic_named_entity
+    RELATION(dne, "IN", document):
+
+
+ENTITY("DocDynamicEnt5YearBinned"):
+    NODE("Document") document:
+        + docID  = DocDynamicEnt5YearBinned.id_to_text
+    NODE("DynamicEntity5YearBinned") dne:
+        + name = DocDynamicEnt5YearBinned.dynamic_named_entity
+    RELATION(dne, "IN", document):
     
 
 #ENTITY("Instution"):

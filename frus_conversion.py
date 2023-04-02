@@ -20,9 +20,6 @@ if __name__ == "__main__":
     import numpy as np
     import math
 
-    filename = "frus_schema.yaml"
-
-
     # Configure Logging
     import logging
 
@@ -34,11 +31,15 @@ if __name__ == "__main__":
     console_handler.setFormatter(log_formatter)
     logger.addHandler(console_handler)
 
-
     import sqlite3
     import sqllite_handler
 
-    rdb_name = 'tables/texts_69_76.db'
+
+    filename = "frus_schema.yaml"
+
+    tables_path = 'tables/tables_52_88/'
+
+    rdb_name = tables_path+'texts_52_88.db'
 
     # Setup sqlite database for transcript texts
     # Create table if not exists
@@ -53,37 +54,48 @@ if __name__ == "__main__":
     sqllite_handler.init(rdb_name)
 
 
-    doc_df = pd.read_csv('tables/doc_69_76.csv')
+    doc_df = pd.read_csv(tables_path+'/doc.csv') # permanent
 
     # change year from type 'float' to 'str(int)' suitable for rel2graph
     doc_df['year'] = doc_df['year'].apply(lambda x: x if math.isnan(x) else str(int(x)))
 
-    country_df = pd.read_csv('tables/country_69_76.csv')
-    city_country_df = pd.read_parquet('tables/city_69_76_final.parquet')
-    country_mentioned_df = pd.read_csv('tables/country_mentioned_69_76.csv')
+    country_df = pd.read_csv(tables_path+'country.csv')
+    city_country_df = pd.read_parquet(tables_path+'city_final.parquet')
+    country_mentioned_df = pd.read_csv(tables_path+'country_mentioned.csv')
 
     era_df = pd.read_csv('tables/era.csv')
     #year_df = pd.read_csv('tables/year.csv') removed as not functional
 
-    person_df = pd.read_parquet('tables/new_unified_person_df_final.parquet')
-    person_sentby_df = pd.read_csv('tables/person_sentby_69_76.csv')
-    person_sentto_df = pd.read_csv('tables/person_sentto_69_76.csv')
-    person_mentioned_df = pd.read_csv('tables/person_mentioned_69_76.csv')
+    person_df = pd.read_parquet(tables_path+'new_unified_person_df_final.parquet')
+    person_sentby_df = pd.read_csv(tables_path+'person_sentby.csv')
+    person_sentto_df = pd.read_csv(tables_path+'person_sentto.csv')
+    person_mentioned_df = pd.read_csv(tables_path+'person_mentioned.csv')
 
-    religion_df = pd.read_parquet('tables/person_religion_69_76.parquet')
-    citizenship_df = pd.read_parquet('tables/person_citizenship_69_76.parquet')
-    occupation_df = pd.read_parquet('tables/person_occupation_69_76.parquet')
-    political_party_df = pd.read_parquet('tables/person_political_party_69_76.parquet')
-    role_df = pd.read_parquet('tables/person_role_69_76.parquet')
-    school_df = pd.read_parquet('tables/person_school_69_76.parquet')
+    religion_df = pd.read_parquet(tables_path+'person_religion.parquet')
+    citizenship_df = pd.read_parquet(tables_path+'person_citizenship.parquet')
+    occupation_df = pd.read_parquet(tables_path+'person_occupation.parquet')
+    political_party_df = pd.read_parquet(tables_path+'person_political_party.parquet')
+    role_df = pd.read_parquet(tables_path+'person_role.parquet')
+    school_df = pd.read_parquet(tables_path+'person_school.parquet')
 
-    redaction_df = pd.read_parquet('tables/redaction_69_76.parquet')
-    topic_desc_df = pd.read_csv('tables/topic_descp_69_76.csv')
-    doc_topic_df = pd.read_csv('tables/doc_topic_69_76.csv')
+    redaction_df = pd.read_parquet(tables_path+'redaction.parquet')
 
+    # change path manually each time!
+    topic_desc_BertWithEntities_df = pd.read_csv(tables_path+'topic_descp_52_88.csv')
+    doc_topic_BertWithEntities_df = pd.read_csv(tables_path+'doc_topic_52_88.csv')
+    topic_desc_BertNoEntities_df = pd.read_csv(tables_path+'topic_descp_52_88_entremoved.csv')
+    doc_topic_BertNoEntities_df = pd.read_csv(tables_path+'doc_topic_52_88_entremoved.csv')
+    topic_desc_LDANoEntities_df = pd.read_parquet(tables_path+'topic_descp_52_88_lda_entremoved_len3.parquet')
+    doc_topic_LDANoEntities_df = pd.read_parquet(tables_path+'doc_topic_52_88_lda_entremoved_len3.parquet')
 
+    entity_sent_df = pd.read_parquet(tables_path+'entity_sentiment.parquet')
+    # change path manually each time!
+    dynamic_entity4year_doc_df = pd.read_parquet(tables_path+'ne2doc_4yearbinned.parquet') # x year binned. x user input
+    #dynamic_entity5year_doc_df = pd.read_parquet(tables_path+'ne2doc_5yearbinned.parquet')
+
+    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frus-52-88')
     #graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='neo4j')
-    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frusphase2')
+    #graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frusphase2')
 
     graph.delete_all()  # reset graph (only when first creating the databse, here for debugging purposes)
 
@@ -150,8 +162,15 @@ if __name__ == "__main__":
                                 PandasDataframeIterator(school_df, "School"),
                                 PandasDataframeIterator(citizenship_df, "Citizenship"),
                                 PandasDataframeIterator(redaction_df, "Redaction"),
-                                PandasDataframeIterator(topic_desc_df, "Topic"),
-                                PandasDataframeIterator(doc_topic_df, "DocTopic"),
+                                PandasDataframeIterator(topic_desc_BertWithEntities_df, "TopicBertWithEntities"),
+                                PandasDataframeIterator(doc_topic_BertWithEntities_df, "DocTopicBertWithEntities"),
+                                PandasDataframeIterator(topic_desc_BertNoEntities_df, "TopicBertNoEntities"),
+                                PandasDataframeIterator(doc_topic_BertNoEntities_df, "DocTopicBertNoEntities"),
+                                PandasDataframeIterator(topic_desc_LDANoEntities_df, "TopicLDANoEntities"),
+                                PandasDataframeIterator(doc_topic_LDANoEntities_df, "DocTopicLDANoEntities"),
+                                #PandasDataframeIterator(entity_sent_df, "EntitySentiment"),
+                                PandasDataframeIterator(dynamic_entity4year_doc_df, "DocDynamicEnt4YearBinned"),
+                                #PandasDataframeIterator(dynamic_entity5year_doc_df, "DocDynamicEnt5YearBinned"),
                                 ])
 
 

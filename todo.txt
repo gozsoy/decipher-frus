@@ -1,29 +1,27 @@
-17 march Fri
-1- increase KG (nb -> py + mechanics) 13-16
-2- dynamic ne2vec for 69_76 2 year bins (proof of concept) 16-16.30
-3- mix dynamic embeddings with topic modeling  (skeleton code) 18.30-19.30
-4- degree centrality some are 0. check it. 20-..
-5- only include roles with start, and year ..-21
-tf developer certificate 21-00
+1 april sat
 
-18 march Sat
-0- one political paper reading
-1- add ne and their sentiment to KG -only using sentiments for ne that will be used in ne2vec?-
-2- readings & brainstorming hugely: spread info, avoid document dominance
-3- obtain instutions from frus 
-4- dynamic lda
-tf developer certificate 21-00
+create kg_52_88
 
-19 march Sun
-1- prepare slides
+analyse dynamic embeddings with topic modeling (skeleton code)
+nb -> py + mechanics
+
+day full of reading + brainstorming
 
 
+2 april sun
+day full of reading + brainstorming
 
-
-
-some results about ultimate goals before historian meeting
-creative day full of analysis
+readings & brainstorming
+creative day full of analysis, new ideas
+rest of readings & brainstorming hugely: spread info, avoid document dominance
 sort this page
+
+
+ml interviews
+ml design c (all)
+ml desing d (all)
+plan next week
+
 
 readings:social, nlp
 ultimate goals: movement of persons (person importance over time), allies/enemies of countries
@@ -32,11 +30,17 @@ mechanics: nb -> py, add family members
 -rename analysis.py to topic_extraction.py
 -transfer doc topic info merging in analysis.ipynb to analysis.py
 -rename analysis.ipynb to experiment.ipynb
--rename city_eda.ipynb to city_country_extraction.py
+-rename city_eda.ipynb to city_country_extraction.py (use input("Press Enter to continue..."))
 -rename basic_extraction.ipynb to document_extraction.py
 -merge wikidata_querying and person_unify
 -single venv
 -relocate all files under src folder
+-rename wikidata_querying.ipynb to extract_person_extras.ipynb
+-change city and country name extensions within the code
+-use multiprocessing for doc_extraction
+-no ne2vec folder
+-rename sentiment_analysis.ipynb to entity_sentiment_extraction.ipynb
+-create new file name lda_topic_extraction.py from analysis.ipynb
 
 
 
@@ -47,6 +51,14 @@ brainstorming 1:
 4-think on pure nlp for analysis
 
 brainstorming 2:
+political QA
+obtain instutions from frus
+keyword based topic/document search, seeing document relating to 'food', or doing sth with it
+adding region to countries, and dealing with region specific issues (running dynamic topic model for Turkey)
+supervised dummy task
+forcefully community detection
+do sth with keywords and their embeddings, and their similarities?
+how do analysis get affected when no person annotation is available ?
 country mention count over time graph (simple but meaningful statistics)
 start using edge weight (similarity measure, sentiment)?
 only include countries for the sentiment analysis?
