@@ -131,12 +131,127 @@ merge (e1)-[r:NEIGHBOR]-(e2)
 return r
 limit 10
 
+1 (smart neighbor)
+match (e1:Entity)-[:IN]->(d:Document)<-[:IN]-(e2:Entity)
+merge (e1)-[r:NEIGHBOR]-(e2)
+ON CREATE SET r.weight = 1
+ON MATCH SET r.weight = r.weight + 1
+return r
+limit 10
+
 2
 call gds.graph.project('ne2vec_69_76_proj',
 'Entity',
-{NEIGHBOR:{orientation:'UNDIRECTED'}})
+{NEIGHBOR:{orientation:'UNDIRECTED', properties: 'weight'}})
 YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount, projectMillis
 
 3
-CALL gds.fastRP.write('ne2vec_69_76_proj', {embeddingDimension: 128, writeProperty: 'fastrp-embedding'})
+CALL gds.fastRP.write('ne2vec_69_76_proj', {embeddingDimension: 128, writeProperty: 'fastrp-embedding',  relationshipWeightProperty: 'weight'})
 YIELD nodePropertiesWritten
+
+
+# E- LINK PREDICTION
+CALL gds.beta.pipeline.linkPrediction.create('person-religion')
+
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty('person-religion', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 128,
+  randomSeed: 42
+})
+
+CALL gds.beta.pipeline.linkPrediction.addFeature('person-religion', 'hadamard', {
+  nodeProperties: ['embedding']
+}) YIELD featureSteps
+
+CALL gds.beta.pipeline.linkPrediction.configureSplit('person-religion', {
+  testFraction: 0.15,
+  trainFraction: 0.6,
+  validationFolds: 3
+})
+YIELD splitConfig
+
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('person-religion')
+YIELD parameterSpace
+
+CALL gds.graph.project(
+  'person-religion-projection',
+  ['Person','Religion'],
+  {BELIEVED: {orientation: 'UNDIRECTED'}}
+)
+
+CALL gds.beta.pipeline.linkPrediction.train('person-religion-projection', {
+  pipeline: 'person-religion',
+  modelName: 'person-religion-toy',
+  metrics: ['AUCPR'],
+  targetRelationshipType: 'BELIEVED',
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Religion',
+  randomSeed: 12
+}) YIELD modelInfo, modelSelectionStats
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.AUCPR.validation.avg] AS validationScores
+
+
+
+LINK PREDICTION WITH CONTEXT
+CALL gds.beta.pipeline.linkPrediction.create('pipe-person-religion-country')
+
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe-person-religion-country', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 128,
+  randomSeed: 42,
+  contextNodeLabels: ['Country'],
+  contextRelationshipTypes: ['CITIZEN_OF']
+})
+
+CALL gds.beta.pipeline.linkPrediction.addFeature('pipe-person-religion-country', 'hadamard', {
+  nodeProperties: ['embedding']
+})
+
+CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe-person-religion-country', {
+  testFraction: 0.2,
+  trainFraction: 0.6,
+  validationFolds: 3
+})
+
+CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe-person-religion-country',
+{hiddenLayerSizes: [4, 2], penalty: 1, patience: 2})
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe-person-religion-country')
+YIELD parameterSpace
+
+CALL gds.graph.project(
+  'person-religion-country-projection',
+  ['Person','Religion','Country'],
+  {BELIEVED: {orientation: 'UNDIRECTED'},
+  CITIZEN_OF: {orientation: 'UNDIRECTED'}}
+)
+
+CALL gds.beta.pipeline.linkPrediction.train('person-religion-country-projection', {
+  pipeline: 'pipe-person-religion-country',
+  modelName: 'person-religion-country-toy',
+  metrics: ['AUCPR'],
+  targetRelationshipType: 'BELIEVED',
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Religion',
+  randomSeed: 12
+}) YIELD modelInfo, modelSelectionStats
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.AUCPR.validation.avg] AS validationScores
+
+
+CALL gds.beta.pipeline.linkPrediction.predict.stream('person-religion-country-projection', {
+  modelName: 'person-religion-country-toy',
+  topN: 200,
+  threshold: 0.3
+})
+ YIELD node1, node2, probability
+ RETURN gds.util.asNode(node1).name AS person, gds.util.asNode(node2).name AS religion, probability
+ ORDER BY probability
