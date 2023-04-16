@@ -255,3 +255,68 @@ CALL gds.beta.pipeline.linkPrediction.predict.stream('person-religion-country-pr
  YIELD node1, node2, probability
  RETURN gds.util.asNode(node1).name AS person, gds.util.asNode(node2).name AS religion, probability
  ORDER BY probability
+
+
+LINK PREDICTION WITH CONTEXT 2
+CALL gds.beta.pipeline.linkPrediction.create('pipe-wikidata')
+
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe-wikidata', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 128,
+  randomSeed: 42,
+  contextRelationshipTypes: ['SIMILAR_DESCP']
+})
+
+CALL gds.beta.pipeline.linkPrediction.addFeature('pipe-wikidata', 'hadamard', {
+  nodeProperties: ['embedding']
+})
+
+CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe-wikidata', {
+  testFraction: 0.2,
+  trainFraction: 0.6,
+  validationFolds: 3
+})
+
+CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe-wikidata',
+{hiddenLayerSizes: [4, 2], penalty: 1, patience: 2})
+YIELD parameterSpace
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe-wikidata')
+YIELD parameterSpace
+
+
+CALL gds.graph.project(
+  'projection-wikidata-religion',
+  ['Person','Religion'],
+  {BELIEVED: {orientation: 'UNDIRECTED'},
+  SIMILAR_DESCP: {orientation: 'UNDIRECTED'}}
+)
+
+CALL gds.beta.pipeline.linkPrediction.train('projection-wikidata-religion', {
+  pipeline: 'pipe-wikidata',
+  modelName: 'model-wikidata-religion',
+  metrics: ['AUCPR'],
+  targetRelationshipType: 'BELIEVED',
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Religion',
+  randomSeed: 12
+}) YIELD modelInfo, modelSelectionStats
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.AUCPR.validation.avg] AS validationScores
+
+
+CALL gds.beta.pipeline.linkPrediction.predict.stream('projection-wikidata-religion', {
+  modelName: 'model-wikidata-religion',
+  topN: 200,
+  threshold: 0.3
+})
+ YIELD node1, node2, probability
+ with gds.util.asNode(node1).name AS person, gds.util.asNode(node2).name AS religion, probability
+match (p:Person)-[:BELIEVED]-(r:Religion)
+with person, religion, probability, collect(p.name) as excluded_names
+where not person in excluded_names
+return person, religion, probability
+
