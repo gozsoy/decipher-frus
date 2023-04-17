@@ -88,16 +88,19 @@ if __name__ == "__main__":
     topic_desc_LDANoEntities_df = pd.read_parquet(tables_path+'topic_descp_52_88_lda_entremoved_len3.parquet')
     doc_topic_LDANoEntities_df = pd.read_parquet(tables_path+'doc_topic_52_88_lda_entremoved_len3.parquet')
 
-    entity_sent_df = pd.read_parquet(tables_path+'entity_sentiment.parquet')
+    #entity_sent_df = pd.read_parquet(tables_path+'entity_sentiment.parquet')
     # change path manually each time!
     dynamic_entity4year_doc_df = pd.read_parquet(tables_path+'ne2doc_4yearbinned.parquet') # x year binned. x user input
     #dynamic_entity5year_doc_df = pd.read_parquet(tables_path+'ne2doc_5yearbinned.parquet')
 
-    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frus-52-88')
+    # person person similarity for link prediction
+    similar_descp_persons = pd.read_parquet(tables_path+'similar_descp_persons.parquet')
+
+    graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frus5288')
     #graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='neo4j')
     #graph = Graph(scheme="bolt", host="localhost", port=7687,  auth=('neo4j', 'bos'), name='frusphase2')
 
-    graph.delete_all()  # reset graph (only when first creating the databse, here for debugging purposes)
+    #graph.delete_all()  # reset graph (only when first creating the databse, here for debugging purposes)
 
 
     # Now neo4j does not support the numpy dtype int64, so we need to convert it to python native int
@@ -145,36 +148,37 @@ if __name__ == "__main__":
     #        + ID = INT(Person.ID)
 
 
-    iterator = IteratorIterator([PandasDataframeIterator(doc_df, "Document"), 
-                                PandasDataframeIterator(era_df, "Era"), 
-                                PandasDataframeIterator(person_df, "Person"),
+    iterator = IteratorIterator([#PandasDataframeIterator(doc_df, "Document"), 
+                                #PandasDataframeIterator(era_df, "Era"), 
+                                #PandasDataframeIterator(person_df, "Person"),
                                 #PandasDataframeIterator(year_df, "YearTable"), removed
-                                PandasDataframeIterator(person_sentby_df, "PersonSentBy"),
-                                PandasDataframeIterator(person_sentto_df, "PersonSentTo"),
-                                PandasDataframeIterator(person_mentioned_df, "PersonMentionedIn"),
-                                PandasDataframeIterator(country_df, "Country"),
-                                PandasDataframeIterator(city_country_df, "CityCountry"),
-                                PandasDataframeIterator(country_mentioned_df, "CountryMentionedIn"),
-                                PandasDataframeIterator(religion_df, "Religion"),
-                                PandasDataframeIterator(occupation_df, "Occupation"),
-                                PandasDataframeIterator(political_party_df, "PoliticalParty"),
-                                PandasDataframeIterator(role_df, "Role"),
-                                PandasDataframeIterator(school_df, "School"),
-                                PandasDataframeIterator(citizenship_df, "Citizenship"),
-                                PandasDataframeIterator(redaction_df, "Redaction"),
-                                PandasDataframeIterator(topic_desc_BertWithEntities_df, "TopicBertWithEntities"),
-                                PandasDataframeIterator(doc_topic_BertWithEntities_df, "DocTopicBertWithEntities"),
-                                PandasDataframeIterator(topic_desc_BertNoEntities_df, "TopicBertNoEntities"),
-                                PandasDataframeIterator(doc_topic_BertNoEntities_df, "DocTopicBertNoEntities"),
-                                PandasDataframeIterator(topic_desc_LDANoEntities_df, "TopicLDANoEntities"),
-                                PandasDataframeIterator(doc_topic_LDANoEntities_df, "DocTopicLDANoEntities"),
+                                #PandasDataframeIterator(person_sentby_df, "PersonSentBy"),
+                                #PandasDataframeIterator(person_sentto_df, "PersonSentTo"),
+                                #PandasDataframeIterator(person_mentioned_df, "PersonMentionedIn"),
+                                #PandasDataframeIterator(country_df, "Country"),
+                                #PandasDataframeIterator(city_country_df, "CityCountry"),
+                                #PandasDataframeIterator(country_mentioned_df, "CountryMentionedIn"),
+                                #PandasDataframeIterator(religion_df, "Religion"),
+                                #PandasDataframeIterator(occupation_df, "Occupation"),
+                                #PandasDataframeIterator(political_party_df, "PoliticalParty"),
+                                #PandasDataframeIterator(role_df, "Role"),
+                                #PandasDataframeIterator(school_df, "School"),
+                                #PandasDataframeIterator(citizenship_df, "Citizenship"),
+                                #PandasDataframeIterator(redaction_df, "Redaction"),
+                                #PandasDataframeIterator(topic_desc_BertWithEntities_df, "TopicBertWithEntities"),
+                                #PandasDataframeIterator(doc_topic_BertWithEntities_df, "DocTopicBertWithEntities"),
+                                #PandasDataframeIterator(topic_desc_BertNoEntities_df, "TopicBertNoEntities"),
+                                #PandasDataframeIterator(doc_topic_BertNoEntities_df, "DocTopicBertNoEntities"),
+                                #PandasDataframeIterator(topic_desc_LDANoEntities_df, "TopicLDANoEntities"),
+                                #PandasDataframeIterator(doc_topic_LDANoEntities_df, "DocTopicLDANoEntities"),
                                 #PandasDataframeIterator(entity_sent_df, "EntitySentiment"),
-                                PandasDataframeIterator(dynamic_entity4year_doc_df, "DocDynamicEnt4YearBinned"),
-                                #PandasDataframeIterator(dynamic_entity5year_doc_df, "DocDynamicEnt5YearBinned"),
+                                #PandasDataframeIterator(dynamic_entity4year_doc_df, "DocDynamicEnt4YearBinned"),
+                                #PandasDataframeIterator(dynamic_entity5year_doc_df, "DocDynamicEnt5YearBinned"), placeholder
+                                PandasDataframeIterator(similar_descp_persons, "PersonDescpSimilarity"),
                                 ])
 
 
-    converter = Converter(load_file(filename), iterator, graph, num_workers=13)
+    converter = Converter(load_file(filename), iterator, graph, num_workers=12)
 
 
     converter()
