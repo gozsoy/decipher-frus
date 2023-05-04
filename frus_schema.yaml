@@ -1,34 +1,40 @@
 ENTITY("Document"):
     NODE("Document") document:
-        + docID = EXPORT_TEXT_TO_DB(Document.id_to_text)
+        + docID = EXPORT_TEXT_AND_KEYWORDS_TO_DB(Document.id_to_text)
         - subtype = Document.subtype # historical or editorial
         - volume = Document.volume
         - date = AUX(Document.date)
         - year = INT(Document.year)
         - title = Document.title
-        - era = Document.era
-        - personSentBy = Document.person_sentby #[]
-        - personSentTo = Document.person_sentto #[]
-        - personMentioned = Document.person_mentioned #[]
+    #    - era = Document.era
+    #    - personSentBy = Document.person_sentby #[]
+    #    - personSentTo = Document.person_sentto #[]
+    #    - personMentioned = Document.person_mentioned #[]
         - instutionSentBy = Document.inst_sentby #[]
         - instutionSentTo = Document.inst_sentto #[]
-        - instutionMentioned = Document.inst_mentioned #[]
-    NODE("Volume") volume:
-        + id = Document.volume
-        #- name = 
-        #- preface =
-    ONLY_CREATE_IF_EXISTS(NODE("Source"), 'source') source:
-        + name = Document.source
+    #    - instutionMentioned = Document.inst_mentioned #[]
+    #    - keywords = Document.keywords #[]
+        - text_length = Document.txt_len
+        - subjectivity = Document.subj
+        - polarity = Document.pol
+        - type_token_ratio = Document.ttr
+        - corrected_type_token_ratio = Document.cttr
+    #NODE("Volume") volume:
+    #    + id = Document.volume
+    #    #- name = 
+    #    #- preface =
+    #ONLY_CREATE_IF_EXISTS(NODE("Source"), 'source') source:
+    #    + name = Document.source
     ONLY_CREATE_IF_EXISTS(NODE("City"), 'city') city:
         + name = Document.city
-    RELATION(document, "INSTANCE_OF", volume):
-    ONLY_CREATE_IF_EXISTS(RELATION(document, "STORED", source), 'source'):
+    #RELATION(document, "INSTANCE_OF", volume):
+    #ONLY_CREATE_IF_EXISTS(RELATION(document, "STORED", source), 'source'):
     ONLY_CREATE_IF_EXISTS(RELATION(document, "FROM", city), 'city'):
     RELATION(document, "DURING", MATCH("PresidentialEra", name=Document.era)):
 
 
 ENTITY("Country"):
-    NODE("Country") country:
+    ONLY_CREATE_IF_EXISTS(NODE("Country"), 'countryLabel') country:
         + name = Country.countryLabel
         - tag = Country.countryTag
 #        - capital = Country.capital
@@ -47,11 +53,8 @@ ENTITY("CityCountry"):
 
 
 ENTITY("CountryMentionedIn"):
-    NODE("Document") document:
-        + docID = CountryMentionedIn.id_to_text
-    NODE("Country") country:
-        + name = CountryMentionedIn.countryLabel
-    RELATION(document, "MENTIONED", country):
+    RELATION(MATCH("Document", docID=CountryMentionedIn.id_to_text), "MENTIONED", MATCH("Country", name=CountryMentionedIn.countryLabel)):
+
 
 
 # removed because it is redundant
@@ -84,28 +87,17 @@ ENTITY("Person"):
 
 
 ENTITY("PersonSentBy"):
-    NODE("Person") person:
-        + name = PersonSentBy.person_name
-    NODE("Document") document:
-        + docID = PersonSentBy.sent
-    RELATION(document, "SENT_BY", person):
-        # dateSent = PersonSentBy.dateSent
+    RELATION(MATCH("Document", docID=PersonSentBy.sent), "SENT_BY", MATCH("Person", name=PersonSentBy.person_name)):
+
 
 
 ENTITY("PersonSentTo"):
-    NODE("Person") person:
-        + name = PersonSentTo.person_name
-    NODE("Document") document:
-        + docID = PersonSentTo.received
-    RELATION(document, "SENT_TO", person):
+    RELATION(MATCH("Document", docID=PersonSentTo.received), "SENT_TO", MATCH("Person", name=PersonSentTo.person_name)):
 
 
 ENTITY("PersonMentionedIn"):
-    NODE("Person") person:
-        + name = PersonMentionedIn.person_name
-    NODE("Document") document:
-        + docID = PersonMentionedIn.mentioned_in
-    RELATION(document, "MENTIONED", person):
+    RELATION(MATCH("Document", docID=PersonMentionedIn.mentioned_in), "MENTIONED", MATCH("Person", name=PersonMentionedIn.person_name)):
+
 
 
 ENTITY("Citizenship"):
@@ -114,7 +106,7 @@ ENTITY("Citizenship"):
     NODE("Country") country:
         + name = Citizenship.info_name # be careful with historical countries
         - tag = Citizenship.info_tag
-    RELATION(person, "CITIZEN_OF", country):
+    RELATION(MATCH("Person", name=Citizenship.name_set), "CITIZEN_OF", country):
         - started = Citizenship.start_year
         - ended = Citizenship.end_year
 
@@ -125,63 +117,53 @@ ENTITY("Occupation"):
     NODE("Occupation") occupation:
         + name = Occupation.info_name
         - tag = Occupation.info_tag
-    RELATION(person, "WORKED_AS", occupation):
+    RELATION(MATCH("Person", name=Occupation.name_set), "WORKED_AS", occupation):
 
 
 ENTITY("School"):
-    NODE("Person") person:
-        + name = School.name_set
     NODE("School") school:
         + name = School.info_name
         - tag = School.info_tag
-    RELATION(person, "EDUCATED_AT", school):
+    RELATION(MATCH("Person", name=School.name_set), "EDUCATED_AT", school):
     RELATION(school, "IN", MATCH("Country", name=School.country)):
 
 
 ENTITY("PoliticalParty"):
-    NODE("Person") person:
-        + name = PoliticalParty.name_set
     NODE("PoliticalParty") party:
         + name = PoliticalParty.info_name
         - tag = PoliticalParty.info_tag
         #- ideology
-    RELATION(person, "MEMBER_OF", party):
+    RELATION(MATCH("Person", name=PoliticalParty.name_set), "MEMBER_OF", party):
         - started = PoliticalParty.start_year
         - ended = PoliticalParty.end_year
     RELATION(party, "IN", MATCH("Country", name=PoliticalParty.country)):
 
 
 ENTITY("Role"):
-    NODE("Person") person:
-        + name = Role.name_set
     NODE("Role") role:
         + name = Role.info_name
         - tag = Role.info_tag
-    RELATION(person, "POSITION_HELD", role):
+    RELATION(MATCH("Person", name=Role.name_set), "POSITION_HELD", role):
         - started = Role.start_year
         - ended = Role.end_year
     #RELATION(role, "IN", MATCH("Country", name=Role.role_country)):
 
 
 ENTITY("Religion"):
-    NODE("Person") person:
-        + name = Religion.name_set
     NODE("Religion") religion:
         + name = Religion.info_name
         - tag = Religion.info_tag
-    RELATION(person, "BELIEVED", religion):
+    RELATION(MATCH("Person", name=Religion.name_set), "BELIEVED", religion):
 
 
 ENTITY("Redaction"):
-    NODE("Document") document:
-        + docID = Redaction.id_to_text
     NODE("Redaction") redaction:
         + redaction_id = INT(Redaction.redaction_id)
         - raw_text = Redaction.raw_text
         - detected_chunks = Redaction.detected_chunks
         - type = Redaction.type_col
         - amount = FLOAT(Redaction.amount_col)  # float|None
-    RELATION(document, "REDACTED", redaction):
+    RELATION(MATCH("Document", docID=Redaction.id_to_text), "REDACTED", redaction):
 
 
 # Nodes related to topic modeling with Bertopic with named entities
@@ -192,11 +174,7 @@ ENTITY("TopicBertWithEntities"):
 
 
 ENTITY("DocTopicBertWithEntities"):
-    NODE("Document") document:
-        + docID = DocTopicBertWithEntities.id_to_text
-    NODE("TopicBertWithEntities") topic:
-        + name = DocTopicBertWithEntities.assigned_topic
-    RELATION(document, "ABOUT", topic):
+    RELATION(MATCH("Document", docID=DocTopicBertWithEntities.id_to_text), "ABOUT", MATCH("TopicBertWithEntities", name=DocTopicBertWithEntities.assigned_topic)):
 
 
 # Nodes related to topic modeling with Bertopic without named entities
@@ -207,11 +185,7 @@ ENTITY("TopicBertNoEntities"):
 
 
 ENTITY("DocTopicBertNoEntities"):
-    NODE("Document") document:
-        + docID = DocTopicBertNoEntities.id_to_text
-    NODE("TopicBertNoEntities") topic:
-        + name = DocTopicBertNoEntities.assigned_topic
-    RELATION(document, "ABOUT", topic):
+    RELATION(MATCH("Document", docID=DocTopicBertNoEntities.id_to_text), "ABOUT", MATCH("TopicBertNoEntities", name=DocTopicBertNoEntities.assigned_topic)):
 
 
 # Nodes related to topic modeling with LDA without named entities
@@ -222,44 +196,50 @@ ENTITY("TopicLDANoEntities"):
 
 
 ENTITY("DocTopicLDANoEntities"):
-    NODE("Document") document:
-        + docID = DocTopicLDANoEntities.id_to_text
-    NODE("TopicLDANoEntities") topic:
-        + name = DocTopicLDANoEntities.assigned_topic
-    RELATION(document, "ABOUT", topic):
+    RELATION(MATCH("Document", docID=DocTopicLDANoEntities.id_to_text), "ABOUT", MATCH("TopicLDANoEntities", name=DocTopicLDANoEntities.assigned_topic)):
+
 
 
 ENTITY("EntitySentiment"):
-    NODE("Document") document:
-        + docID = EntitySentiment.id_to_text
     NODE("NamedEntity") ne:
         + name = EntitySentiment.named_entity
-    RELATION(document, "HAS_SENTIMENT", ne):
+    RELATION(MATCH("Document", docID=EntitySentiment.id_to_text), "HAS_SENTIMENT", ne):
         - polarity = EntitySentiment.pol
         - subjectivity = EntitySentiment.sub
 
 
 # change the name manually
 ENTITY("DocDynamicEnt4YearBinned"):
-    NODE("Document") document:
-        + docID  = DocDynamicEnt4YearBinned.id_to_text
     NODE("DynamicEntity4YearBinned") dne:
         + name = DocDynamicEnt4YearBinned.dynamic_named_entity
-    RELATION(dne, "IN", document):
+    RELATION(dne, "IN", MATCH("Document", docID=DocDynamicEnt4YearBinned.id_to_text)):
 
 
+# might be redundant
 ENTITY("DocDynamicEnt5YearBinned"):
-    NODE("Document") document:
-        + docID  = DocDynamicEnt5YearBinned.id_to_text
     NODE("DynamicEntity5YearBinned") dne:
         + name = DocDynamicEnt5YearBinned.dynamic_named_entity
-    RELATION(dne, "IN", document):
+    RELATION(dne, "IN", MATCH("Document", docID=DocDynamicEnt5YearBinned.id_to_text)):
     
 
-#ENTITY("Instution"):
-#    NODE("Instution") inst:
-#        + id = INT(Instution.id)
-#        - name = Instution.name
-#        - description = Instution.description
-#    RELATION(person, "SENT_BY", MATCH("Document", personSentBy=Person.id)):
-#    RELATION(person, "SENT_TO", MATCH("Document", personSentTo=Person.id)):
+ENTITY("PersonDescpSimilarity"):
+    RELATION(MATCH("Person", name=PersonDescpSimilarity.source_person), "SIMILAR_DESCP", MATCH("Person", name=PersonDescpSimilarity.target_person)):
+
+
+ENTITY("Term"):
+    NODE("Term") term:
+        + name = Term.description_set
+        - name_list = Term.description_list
+        - id_list = Term.id_list
+
+
+#ENTITY("TermSentBy"):
+#    RELATION(MATCH("Document", docID=TermSentBy.sent), "SENT_BY", MATCH("Term", name=TermSentBy.description_set)):
+
+
+#ENTITY("PersonSentTo"):
+#    RELATION(MATCH("Document", docID=TermSentTo.received), "SENT_TO", MATCH("Term", name=TermSentTo.description_set)):
+
+
+ENTITY("PersonMentionedIn"):
+    RELATION(MATCH("Document", docID=TermMentionedIn.mentioned_in), "MENTIONED", MATCH("Term", name=TermMentionedIn.description_set)):

@@ -1,0 +1,28 @@
+spacy==3.5.0
+spacytextblob==4.0.0
+en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-2.3.1/en_core_web_md-2.3.1.tar.gz
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl
+tqdm==4.64.0
+plotly==5.13.0
+pandas==1.5.2
+graphdatascience==1.6
+scikit-learn==1.0.2
+ray==1.10.0
+bertopic==0.14.0
+keybert==0.7.0
+SPARQLWrapper==2.0.0
+py2neo==2021.2.3
+rel2graph @ git+ssh://git@github.com/sg-dev/rel2graph@9297a826606aa18a2a81df75bb9608615ad50c0d
+numpy==1.21.6
+sentence-transformers
+matplotlib==3.5.2
+jellyfish==0.9.0
+nltk==3.7
+ipykernel==6.9.1
+jupyter-client==7.1.2
+jupyter-core==4.9.2
+tomotopy==0.12.4
+pyldavis==3.4.0
+gensim==4.0.1
+yake==0.4.8
+lexicalrichness

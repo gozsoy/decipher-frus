@@ -13,7 +13,7 @@ from sentence_transformers import SentenceTransformer
 from keybert import KeyBERT
 import os.path
 import math
-
+"""
 nlp = spacy.load('en_core_web_sm')
 
 USE_EMBEDDINGS = True
@@ -169,3 +169,5 @@ topic_model.save(tables_path+"topic_model"+name_extension, save_embedding_model=
 print('topic model saved.')
 
 
+
+"""
