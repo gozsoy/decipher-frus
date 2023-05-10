@@ -1,88 +1,18 @@
-1 april sat
-
-create kg_52_88
-
-analyse dynamic embeddings with topic modeling (skeleton code)
-nb -> py + mechanics
-
-day full of reading + brainstorming
-
-
-2 april sun
-day full of reading + brainstorming
-
-readings & brainstorming
-creative day full of analysis, new ideas
-rest of readings & brainstorming hugely: spread info, avoid document dominance
-sort this page
-
-
-ml interviews
-ml design c (all)
-ml desing d (all)
-plan next week
-
-
-readings:social, nlp
-ultimate goals: movement of persons (person importance over time), allies/enemies of countries
-
-mechanics: nb -> py, add family members
--rename analysis.py to topic_extraction.py
--transfer doc topic info merging in analysis.ipynb to analysis.py
--rename analysis.ipynb to experiment.ipynb
--rename city_eda.ipynb to city_country_extraction.py (use input("Press Enter to continue..."))
--rename basic_extraction.ipynb to document_extraction.py
--merge wikidata_querying and person_unify
--single venv
--relocate all files under src folder
--rename wikidata_querying.ipynb to extract_person_extras.ipynb
--change city and country name extensions within the code
--use multiprocessing for doc_extraction
--no ne2vec folder
--rename sentiment_analysis.ipynb to entity_sentiment_extraction.ipynb
--create new file name lda_topic_extraction.py from analysis.ipynb
-
-
-
-brainstorming 1:
-1-think on interesting research questions
-2-think on overleaf + paper notes
-3-think on nlp + gds application on our KG specifically
-4-think on pure nlp for analysis
-
-brainstorming 2:
-political QA
-obtain instutions from frus
-keyword based topic/document search, seeing document relating to 'food', or doing sth with it
-adding region to countries, and dealing with region specific issues (running dynamic topic model for Turkey)
-supervised dummy task
-forcefully community detection
-do sth with keywords and their embeddings, and their similarities?
-how do analysis get affected when no person annotation is available ?
-country mention count over time graph (simple but meaningful statistics)
-start using edge weight (similarity measure, sentiment)?
-only include countries for the sentiment analysis?
-which topics turkey mentioned in over time? greece -> saudi arabia e.g.(for which topics countries become closer? add sentiment?)
-political word embeddings type named entity embeddings
-merge keywords with ne but this time not on countvectorizer for ke
-adding keywords to KG as well (meaningful keywords from phrase extractor), store their embeddings as well where edge weight is mutual similarity
-adding named entities to KG as well
-adding document/paragraph sentiment to KG as well
-adding sentiments to kg for 2nd goal?
-including the sentence of paragraph redaction is in OR extracting amount of redaction
-how to handle histroical countries? 
-node embeddings from gds + doc2vec + bump chart as proof of concept
-entity linking, then person->political view
-co-reference resolution? neuralcoref by huggingface
-source requires more processing
-handle person who are not annotated with persName tag
-threshold on cosine similarities for wikidata matching
-increase cosine similarity threshold for sbert wikidata description match
-replace abbr within text with full
-using person, country, institution descriptions from wikipedia ?
-sentence or paragraph level semantics and their projection and evaluation in space ?
-event 
-https://spacy.io/usage/linguistic-features#entity-lixnking
-emotion detection
-
-line 40 white house -> morocco, line 71. line 121, 140, 284, line 507
+mechanics: nb -> py
+DONE rename basic_extraction.ipynb to document_extraction.py
+DONE use multiprocessing for doc_extraction (RETURN VALUES THEN DF IN ONE STEP. NO CONCAT!)
+DONE single venv (using pip freeze compare libraries)
+DONE rename analysis.ipynb to experiment.ipynb
+DONE merge wikidata_querying and person_unify (no! too long running times)
+DONE rename wikidata_querying.ipynb to extract_person_extras.ipynb
+DONE change city and country name extensions within the code
+DONE rename city_eda.ipynb to city_country_extraction.py (use input("Press Enter to continue..."))
+DONE redaction.py
+DONE institution.py (term)
+DONE relocate all files under src folder
+DONE no ne2vec folder
+DONE rename sentiment_analysis.ipynb to entity_sentiment_extraction.ipynb
+DONE entity embeddings.py try same with multiprocessing
+DONE transfer doc topic info merging in analysis.ipynb to analysis.py
+DONE rename analysis.py to topic_extraction.py
+DONE create new file name lda_topic_extraction.py from analysis.ipynb
