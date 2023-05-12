@@ -1,0 +1,173 @@
++ volume count, file count
+MATCH (d:Document)
+return count(distinct(d.volume)) as volume_count, count(d) as file_count
+
++ volumes with person annotations (+shift over binned years)
+match (p:Person)-[:SENT_BY|:SENT_TO|:MENTIONED]-(d:Document)
+with collect(distinct(d.volume)) as annotated_volumes
+match (d:Document)
+where not d.volume in annotated_volumes
+return distinct(d.volume)
+
++ volumes with person annotations shift over era
+match (p:Person)-[:SENT_BY|:SENT_TO|:MENTIONED]-(d:Document)
+with collect(distinct(d.volume)) as annotated_volumes
+match (d:Document)-[:DURING]-(e:PresidentialEra)
+return e.name as era, e.startYear as era_start_year, d.volume as volume, d.volume in annotated_volumes as is_annotated
+temp_df = embedding_df.drop_duplicates(subset=['era','volume']).groupby(['era','era_start_year','is_annotated']).agg('count').reset_index().sort_values(by='era_start_year',ascending=True)
+import plotly.express as px
+long_df = px.data.medals_long()
+fig = px.bar(temp_df, x="era", y="volume", color="is_annotated", title="Person Annotations over Presidential Eras",
+             labels={'volume':'Volume Count','era':'Presidential Era'}, height=400,width=800)
+fig.show()
+
++ person mention count vs wikidata match 
+match (p:Person)-[:MENTIONED]-(d:Document)
+return p.name as name, p.selected_wiki_entity is not null as is_wikified, count(d) as mentioned_doc_count
+order by mentioned_doc_count desc
+import pandas as pd
+overall_df = pd.DataFrame()
+bin_size = [25, 50, 100, 200, 400, 800, 1600, 3200, 6400, len(embedding_df)]
+for temp_bin_size in bin_size:
+    sd_df = embedding_df.iloc[:temp_bin_size].groupby('is_wikified').agg({'name':'count'}).reset_index()
+    sd_df['bin_size']=temp_bin_size
+    overall_df = pd.concat((overall_df,sd_df))
+overall_df['ratio']=overall_df['name']/overall_df['bin_size']
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+import seaborn as sns
+sns.set_theme(style="whitegrid")
+penguins = sns.load_dataset("penguins")
+# Draw a nested barplot by species and sex
+g = sns.catplot(
+    data=overall_df, kind="bar",
+    x="bin_size", y="ratio", hue="is_wikified",
+    palette="colorblind", alpha=.8, height=3, aspect=2,
+).set(title='Person Mention Count vs. Wikification Success')
+g.despine(left=True)
+g.set_axis_labels("First x Most Mentioned Persons", "Person Count")
+g.legend.set_title("is_wikified")
+
+
++ document count by era
+match (d:Document)-[:DURING]-(e:PresidentialEra)
+return e.name, count(d) as doc_count
+order by doc_count desc
+import plotly.express as px
+fig = px.bar(embedding_df, x='e.name', y='doc_count', title="Document Count by Presidential Era",
+             labels={'e.name':'Presidential Era','doc_count':'Document Count'}, height=350,width=600)
+fig.show()
+
++ document count by country
+match (d:Document)-[:FROM]-(c:City)-[:LOCATED_IN]-(co:Country)
+return co.name, count(d) as doc_count
+order by doc_count desc
+import plotly.express as px
+df = px.data.gapminder().query("year==2007")
+fig = px.scatter_geo(embedding_df.iloc[1:], locations="co.name",
+                     hover_name="co.name", size="doc_count",
+                     projection="natural earth",locationmode='country names',
+                     opacity=0.5)
+fig.show()
+
++ document count by continent
+match (e:PresidentialEra)-[:DURING]-(d:Document)-[:FROM]-(c:City)-[:LOCATED_IN]-(co:Country)
+return e.name as era, e.startYear as era_start_year, co.name as country, count(d) as doc_count
+order by doc_count desc
+country_continent = pd.read_csv('../tables/Countries-Continents.csv')
+temp_df = embedding_df.merge(country_continent,how='left',left_on='country',right_on='Country')
+temp_df= temp_df[['era','era_start_year','Continent','doc_count']]
+temp_df = temp_df.sort_values(by='era_start_year',ascending=True)
+temp_df = temp_df.drop_duplicates(['era','era_start_year','Continent'])
+temp_df.dropna(inplace=True)
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.set_theme(style="whitegrid")
+# Plot the responses for different events and regions
+g = sns.lineplot(x="era", y="doc_count",
+             hue="Continent",palette='colorblind',
+             data=temp_df[temp_df['Continent']!='United States of America'])
+plt.setp(g.get_xticklabels(), rotation=20)
+g.set(xlabel='Presidential Era', ylabel='Document Count')
+g.set(title='Document Count by Continent over Presidential Eras')
+
++ persons annotated but not mentioned in any documents
+match (p:Person)-[:MENTIONED]-(d:Document)
+with collect(distinct(p)) as annotated_persons
+match (p2:Person)
+where not p2 in annotated_persons
+return count(p2)
+
++ redaction count shift over binned years
+match (r:Redaction)-[:REDACTED]-(d:Document)
+where not isNaN(d.year)
+return d.year, count(r) as red_cnt
+order by red_cnt desc
+# Plot the responses for different events and regions
+g = sns.lineplot(x="d.year", y="red_cnt",palette='colorblind',
+                data=embedding_df)
+plt.setp(g.get_xticklabels(), rotation=20)
+g.set(xlabel='Year', ylabel='Redaction Count')
+g.set(title='Redaction Count over Years')
+
++ redaction type frequency
+match (r:Redaction)
+return r.type
+temp_df = embedding_df.value_counts().reset_index()
+temp_df.rename(columns={'r.type':'redaction_type',0:'count'},inplace=True)
+temp_df = temp_df[temp_df['count']>50]
+temp_df['log_count'] = np.log10(temp_df['count'])
+temp_df['log_count'] = np.log10(temp_df['count'])
+# Plot the responses for different events and regions
+g = sns.barplot(x="log_count", y="redaction_type",palette='colorblind',
+                data=temp_df, orient='h')
+g.set(xlabel='Count (Log scale). Numbers on bars indicate actual count', ylabel='Redaction Type')
+g.set(title='Redaction Types Frequencies')
+for index, row in temp_df.iterrows():
+    g.text(row.log_count, row.name, row['count'], color='black', ha="center",fontsize=10)
+
++ person count by country
+match (r:Country)-[:CITIZEN_OF]-(p:Person)
+return r.name, count(p) as count
+order by count desc
+match (r:Occupation)-[:WORKED_AS]-(p:Person)
+return r.name, count(p) as count
+order by count desc
+match (p:Person)
+where not p.gender is null
+return p.gender
+match (r:Religion)-[:BELIEVED]-(p:Person)
+return r.name, count(p) as count
+order by count desc
+f, axes = plt.subplots(3, 1, figsize=(5, 12))
+#sns.barplot(x=0, y= "p.gender", data=gender_df.value_counts().reset_index().iloc[:2],  orient='h' , ax=axes[0])
+#axes[0].set(xlabel='Count', ylabel='Gender')
+sns.barplot(x='count', y= "r.name", data=occupation_df.iloc[:20],  orient='h' , ax=axes[0], palette='colorblind')
+axes[0].set(xlabel='Count', ylabel='Occupation')
+#f, axes = plt.subplots(2, 1, figsize=(5, 9))
+sns.barplot(x='count', y= "r.name", data=religion_df.iloc[:20],  orient='h' , ax=axes[1], palette='colorblind')
+axes[1].set(xlabel='Count', ylabel='Religion')
+sns.barplot(x='count', y= "r.name", data=citizen_df.iloc[:20],  orient='h' , ax=axes[2], palette='colorblind')
+axes[2].set(xlabel='Count', ylabel='Citizenship')
+
++ political party count by country
+match (p:PoliticalParty)-[:IN]-(c:Country)-[:LOCATED_IN]-(ci:City)
+return c.name, count(distinct(p.name)) as party_count
+order by party_count desc
+
++ topic distribution by country
+match (c:Country {name:'Turkey'})-[:CITIZEN_OF]-(p:Person)-[:MENTIONED]-(d:Document)-[:ABOUT]-(t:TopicBertWithEntities)
+match (d)-[:DURING]-(e:PresidentialEra)
+match (d)-[:ABOUT]-(t2:TopicBertNoEntities)
+return e.name, collect(distinct(t.name)), collect(distinct(t2.name))
+
++ topic count by president
+match (e:PresidentialEra)-[:DURING]-(d:Document)-[:ABOUT]-(t:TopicBertWithEntities)
+match (d)-[:ABOUT]-(t2:TopicBertNoEntities)
+match (d)-[:ABOUT]-(t3:TopicLDANoEntities)
+return e.name, count(distinct(t.name)) as topic_count1, count(distinct(t2.name)) as topic_count2, count(distinct(t3.description)) as topic_count3
+order by topic_count1 desc

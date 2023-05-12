@@ -28,3 +28,4 @@ yake==0.4.8
 lexicalrichness
 textblob-0.17.1
 flake8
+seaborn==0.12.2
