@@ -9,7 +9,7 @@ Codebase for Master's Thesis at ETH Zurich
 
 + Create folders named 'volumes', and 'plots' in this repo.
 
-+ Download [FRUS files](https://github.com/HistoryAtState/frus/volumes), and put them under volume/ folder.
++ Download [FRUS files](https://github.com/HistoryAtState/frus/volumes), and put them under 'volumes'.
 
 + Using Python 3.8.8, run the following commands.
 
@@ -20,7 +20,7 @@ pip install -r requirements.txt
 cd src/
 ```
 
-+ Download [world_cities.csv](https://github.com/datasets/world-cities/blob/master/data/world-cities.csv), and put it under tables/. It is required for city-country matching (please see report).
++ Download [world_cities.csv](https://github.com/datasets/world-cities/blob/master/data/world-cities.csv), and put it under 'tables'. It is required for city-country matching (please see report).
 
 + Run the parsing, enrichment, and graph population files in the following order.
 
@@ -39,9 +39,9 @@ python frus_conversion.py
 ```
 Your FRUS KG is ready!
 
-Note 1: Do not forget to comment line 118 in frus_conversion.py once ran above once. This will ensure any change afterwards will update the existing graph.
+Note 1: Do not forget to comment line 118 in frus_conversion.py when ran above once. This will ensure any change afterwards will update the existing graph.
 
-Note 2: Do not forget to create an experiment specific subfolder under both tables/ and plots/ !
+Note 2: Do not forget to create an experiment specific subfolder under both 'tables' and 'plots' !
 ```
 tables/tables_1952_1988
 plots/plots_1952_1988
@@ -64,4 +64,4 @@ python link_prediction.py
 ```
 Then, follow instructions in 'src/cypher_commands.txt' D.
 
-We provide Neo4j dump covering FRUS years from 1952 to 1988, that is ready to [download](https://polybox.ethz.ch/index.php/s/p6V43kgdNfuUI94) and analyze in Neo4j.
++ We provide Neo4j dump covering FRUS years from 1952 to 1988, that is ready to [download](https://polybox.ethz.ch/index.php/s/p6V43kgdNfuUI94) and analyze in Neo4j.
