@@ -7,7 +7,7 @@ from multiprocessing import Pool
 nlp = spacy.load('en_core_web_sm')
 nlp.add_pipe('spacytextblob')
 
-tables_path = 'tables/tables_52_88/'
+tables_path = '../tables/tables_1952_1988/'
 
 # these entities will be omitted when found
 unwanted_entities = ['DATE', 'TIME', 'QUANTITY', 'ORDINAL',
@@ -90,7 +90,7 @@ def process_document(tpl):
 if __name__ == '__main__':
 
     # read files from tables_path
-    doc_df = pd.read_csv(tables_path+'doc.csv')
+    doc_df = pd.read_parquet(tables_path+'doc.parquet')
     id_to_text_list = doc_df['id_to_text'].values
     free_text_list = doc_df['text'].values
 

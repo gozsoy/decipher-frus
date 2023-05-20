@@ -10,18 +10,22 @@ import tomotopy as tp
 
 nlp = spacy.load('en_core_web_sm')
 
-tables_path = '../tables/tables_52_88/'
-plots_path = '../plots/plots_52_88/'
+tables_path = '../tables/tables_1952_1988/'
+plots_path = '../plots/plots_1952_1988/'
 name_extension = '_lda_entremoved_min_word_len3'
 
 # lda topic count - hyperparameter
-topic_count = 100
+topic_count = 50
 
 
 # helper function for removing named entities, stopwords, punctuation,
 #  words with length smaller than 3 from text
 @ray.remote
 def preprocess(row):
+    # trimming extra long texts for memory in character cnt
+    if len(row) > 1000000:
+        row = row[:1000000]
+
     return [t.lemma_.lower() for t in nlp(row) if not t.is_punct 
             and not t.is_stop and t.ent_iob_ == 'O' and len(t.text) >= 3]  
 # and t.pos_ in ['PROPN','NOUN']
@@ -33,6 +37,8 @@ if __name__ == "__main__":
     # STEP 0: load documents, remove entities, and save
     #####
 
+    doc_df = pd.read_parquet(tables_path+'doc.parquet')
+
     # if already extracted, use them
     if os.path.isfile(tables_path+"free_text_list"+name_extension):
         with open(tables_path+"free_text_list"+name_extension, "rb") as fp:
@@ -40,7 +46,6 @@ if __name__ == "__main__":
         print('lda free text list loaded.')
 
     else:
-        doc_df = pd.read_csv(tables_path+'doc.csv')
         free_text_list = doc_df['text'].values
 
         # check if text None, if so replace it with ' '.

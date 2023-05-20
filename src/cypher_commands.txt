@@ -1,4 +1,6 @@
+#####
 # A- REDACTION ANALYSIS
+#####
 
 Q. Which topics have highest amount of redaction (sum of redacted lines) ?
 match (d:Document)-[:REDACTED]-(r:Redaction)
@@ -59,21 +61,11 @@ return c.name, count(d.docID) as doc_count, sum(r_count) as tot_count, sum(r_cou
 order by tot_count desc
 limit 20 
 
-Q. Who has been mentioned most in documents with redactions ?
-
-
+#####
 # B- ROLE CENTRALITY ANALYSIS
+#####
 
 1
-match (p1:Person)-[:MENTIONED]-(d:Document)-[:MENTIONED]-(p2:Person)
-match (r1:Role)-[:POSITION_HELD]-(p1)
-match (r2:Role)-[:POSITION_HELD]-(p2)
-where r1<>r2
-merge (r1)-[re:NEIGHBOR]-(r2)
-return re
-limit 10
-
-1 (smart neighbor)
 match (p1:Person)-[:MENTIONED]-(d:Document)-[:MENTIONED]-(p2:Person)
 match (r1:Role)-[ph1:POSITION_HELD]-(p1)
 match (r2:Role)-[ph2:POSITION_HELD]-(p2)
@@ -83,55 +75,28 @@ ph2.started is not null and ph2.ended is not null and
 tostring(d.date) <> 'NaN' and datetime(ph1.started) <= datetime(d.date) <= datetime(ph1.ended) and
 datetime(ph2.started) <= datetime(d.date) <= datetime(ph2.ended) and
 size(ph1.started)=20 and size(ph1.ended)=20 and size(ph2.started)=20 and size(ph2.ended)=20
-merge (r1)-[re:SMART_NEIGHBOR]-(r2)
+merge (r1)-[re:CENTRALITY_NEIGHBOR]-(r2)
 return re
 limit 10
 
-
 2
-call gds.graph.project('only_roles_69_76',
+call gds.graph.project('role_importance_projection',
 'Role',
-{NEIGHBOR:{orientation:'UNDIRECTED'}})
+{CENTRALITY_NEIGHBOR:{orientation:'UNDIRECTED'}})
 YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount, projectMillis
 
 3
-CALL gds.pageRank.stream('only_roles_69_76')
+CALL gds.pageRank.stream('role_importance_projection')
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC
 limit 100
 
-
-# C- COUNTRY COMMUNITY DETECTION (not meaningful as is)
-
-1
-match (c1:Country)-[:MENTIONED]-(d:Document)-[:MENTIONED]-(c2:Country)
-merge (c1)-[re:NEXT]-(c2)
-return re
-limit 10
-
-2
-call gds.graph.project('only_country_69_76',
-'Country',
-{NEXT:{orientation:'UNDIRECTED'}})
-YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount, projectMillis
-
-3
-CALL gds.wcc.stream('only_country_69_76')
-YIELD nodeId, componentId
-with gds.util.asNode(nodeId).name AS name, componentId
-return componentId, collect(name)
-
-
-# D- NE2VEC -DYNAMIC NAMED ENTITY EMBEDDINGS-
+#####
+# C- DYNAMIC ENTITY EMBEDDINGS
+#####
 
 1
-match (e1:Entity)-[:IN]->(d:Document)<-[:IN]-(e2:Entity)
-merge (e1)-[r:NEIGHBOR]-(e2)
-return r
-limit 10
-
-1 (smart neighbor)
 match (e1:Entity)-[:IN]->(d:Document)<-[:IN]-(e2:Entity)
 merge (e1)-[r:NEIGHBOR]-(e2)
 ON CREATE SET r.weight = 1
@@ -149,8 +114,10 @@ YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationship
 CALL gds.fastRP.write('ne2vec_69_76_proj', {embeddingDimension: 128, writeProperty: 'fastrp-embedding',  relationshipWeightProperty: 'weight'})
 YIELD nodePropertiesWritten
 
+#####
+# D- LINK PREDICTION
+#####
 
-# E- LINK PREDICTION
 1
 CALL gds.beta.pipeline.linkPrediction.create('pipe-wikidata')
 

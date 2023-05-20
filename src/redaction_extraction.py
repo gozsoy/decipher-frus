@@ -14,10 +14,10 @@ ns = {'xml': 'http://www.w3.org/XML/1998/namespace',
       }
 
 # define path to save extracted files
-tables_path = 'tables/tables_52_88_demo/'
+tables_path = '../tables/tables_1952_1988/'
 
 # only use documents within these years
-start_year, end_year = 1952, 1958
+start_year, end_year = 1952, 1988
 
 nlp = spacy.load('en_core_web_sm')
 
@@ -73,13 +73,13 @@ if __name__ == "__main__":
     global_redaction_list = []
 
     # main loop over all volumes
-    for file in glob.glob('volumes/frus*'):
-        file_start_year = int(file[12:16])
+    for file in tqdm(glob.glob('../volumes/frus*')):
+        file_start_year = int(file[15:19])
         
         # if volume date is within specified dates
         if file_start_year >= start_year and file_start_year <= end_year:
 
-            volume = file[8:-4]
+            volume = file[11:-4]
 
             tree = ET.parse(file)
             root = tree.getroot()
@@ -132,8 +132,8 @@ if __name__ == "__main__":
         # resolve multi-paranthesis cases by hand.
         # prints these for debugging purposes
         elif len(result) > 1:
-            print(f'Untidy reduction format. \
-                  Multi-paranthesis use in row {idx}: {temp_text}')
+            print(f'Untidy reduction format.'
+                  f'Multi-paranthesis use in row {idx}: {temp_text}')
 
         # this symbol is problematic, remove it
         temp_text = temp_text.replace('½', '') 
@@ -149,7 +149,7 @@ if __name__ == "__main__":
             for temp_chunk in doc.noun_chunks:
                 for token in temp_chunk:
                     if token.pos_ == 'NOUN':
-                        temp_count = type_dict[token.lemma_]
+                        temp_count = type_dict.get(token.lemma_, 0)
 
                         if temp_count > max_count:
                             max_count = temp_count

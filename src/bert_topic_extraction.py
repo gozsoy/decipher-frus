@@ -13,8 +13,8 @@ import ray
 
 nlp = spacy.load('en_core_web_sm')
 
-tables_path = 'tables/tables_52_88/'
-plots_path = 'plots/plots_52_88/'
+tables_path = '../tables/tables_1952_1988/'
+plots_path = '../plots/plots_1952_1988/'
 name_extension = '_entremoved'  # or '' for original docs
 
 # If document embeddings already calculated, set True. if not, set False.
@@ -22,13 +22,18 @@ name_extension = '_entremoved'  # or '' for original docs
 # We suggest using GPU and storing in tables_path beforehand.
 USE_EMBEDDINGS = True
 
-# Remove named entities from text. only valid if USE_EMBEDDINGS=True.
+# Remove named entities from text. only valid if USE_EMBEDDINGS=False.
 REMOVE_ENTITIES = True
 
 
 # helper function for removing named entities from text
 @ray.remote
 def remove_entities(txt):
+
+    # trimming extra long texts for memory in character cnt
+    if len(txt) > 1000000:
+        txt = txt[:1000000]
+
     document = nlp(txt)
 
     edited_txt = ""
@@ -50,7 +55,7 @@ if __name__ == "__main__":
     #####
     if not USE_EMBEDDINGS:
 
-        doc_df = pd.read_csv(tables_path+'doc.csv')
+        doc_df = pd.read_parquet(tables_path+'doc.parquet')
         free_text_list = doc_df['text'].values
 
         # check if text None, if so replace it with ' '.
@@ -79,7 +84,7 @@ if __name__ == "__main__":
 
     # load saved documents and embeddings
     else:
-        doc_df = pd.read_csv(tables_path+'doc.csv')
+        doc_df = pd.read_parquet(tables_path+'doc.parquet')
         with open(tables_path+"free_text_list"+name_extension, "rb") as fp:
             free_text_list = pickle.load(fp)
 
@@ -112,7 +117,7 @@ if __name__ == "__main__":
     # topics = topic_model.reduce_outliers(free_text_list, topics)
     # print('topics outliers reduced. visualization process starting...')
 
-    topic_model.reduce_topics(free_text_list, 'auto')
+    topic_model.reduce_topics(free_text_list, nr_topics=100)
     print('topics reduced.')
 
     #####
@@ -143,11 +148,11 @@ if __name__ == "__main__":
                    name_extension+".html")
     print('plot 1 done.')
 
-    fig = topic_model.visualize_documents(
+    '''fig = topic_model.visualize_documents(
         docs=free_text_list, embeddings=embeddings)
     fig.write_html(plots_path+"umap_document_embeddings" + 
                    name_extension+".html")
-    print('plot 2 done.')
+    print('plot 2 done.')'''
 
     fig = topic_model.visualize_heatmap()
     fig.write_html(plots_path+"topic_similarity_heatmap" + 

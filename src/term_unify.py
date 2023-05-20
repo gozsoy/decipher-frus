@@ -19,16 +19,16 @@ ns = {'xml': 'http://www.w3.org/XML/1998/namespace',
       }
 
 # define path to save extracted files
-tables_path = 'tables/tables_52_88_demo/'
+tables_path = '../tables/tables_1952_1988/'
 
 # only use documents within these years
-start_year, end_year = 1952, 1958
+start_year, end_year = 1952, 1988
 
 
 # helper function 1 step 0
 # parses term item and extracts name, id, description
 def extract_institution(item, file):
-    volume = file[8:-4]
+    volume = file[11:-4]
 
     term_item = item.find('.//dflt:term[@xml:id]', ns)
 
@@ -130,9 +130,9 @@ if __name__ == "__main__":
 
     no_annotation_cnt = 0
 
-    for file in tqdm(glob.glob('volumes/frus*')):
+    for file in tqdm(glob.glob('../volumes/frus*')):
 
-        file_start_year = int(file[12:16])
+        file_start_year = int(file[15:19])
         
         # within confined period
         if file_start_year >= start_year and file_start_year <= end_year:

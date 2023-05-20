@@ -30,7 +30,7 @@ logger.addHandler(console_handler)
 
 # necessary variable definitions
 filename = "frus_schema.yaml"
-tables_path = 'tables/tables_52_88/'
+tables_path = '../tables/tables_1952_1988/'
 rdb_name = tables_path+'texts.db'
 
 
@@ -43,20 +43,19 @@ if __name__ == "__main__":
 
     conn.execute('''CREATE TABLE IF NOT EXISTS transcript
             (ID PRIMARY KEY NOT NULL,
-            TEXT,
-            KEYWORDS);''')
+            TEXT);''')
     conn.close()
 
     sqllite_handler.init(rdb_name)
 
     # load all files
     # document files
-    doc_df = pd.read_csv(tables_path+'doc.csv')
+    doc_df = pd.read_parquet(tables_path+'doc.parquet')
     # change year from type 'float' to 'str(int)' suitable for rel2graph
     doc_df['year'] = doc_df['year'].apply(lambda x: x if math.isnan(x) 
                                           else str(int(x)))
 
-    era_df = pd.read_csv('tables/era.csv')
+    era_df = pd.read_csv('../tables/era.csv')
 
     # city country files
     country_df = pd.read_csv(tables_path+'country.csv')
@@ -80,7 +79,7 @@ if __name__ == "__main__":
 
     # term files
     term_df = pd.read_parquet(tables_path+'unified_term_df.parquet')
-    term_mentioned_df = pd.read_csv(tables_path+'instution_mentioned.csv')
+    term_mentioned_df = pd.read_csv(tables_path+'term_mentioned.csv')
 
     # redaction file
     redaction_df = pd.read_parquet(tables_path+'redaction.parquet')
@@ -93,30 +92,30 @@ if __name__ == "__main__":
     doc_topic_BertNoEntities_df = pd.read_csv(
         tables_path+'doc_topic_entremoved.csv')
     topic_desc_LDANoEntities_df = pd.read_parquet(
-        tables_path+'topic_descp_lda_entremoved_len3.parquet')
+        tables_path+'topic_descp_lda_entremoved_min_word_len3.parquet')
     doc_topic_LDANoEntities_df = pd.read_parquet(
-        tables_path+'doc_topic_lda_entremoved_len3.parquet')
+        tables_path+'doc_topic_lda_entremoved_min_word_len3.parquet')
 
     # named entity files and their sentiments
-    # entity_sent_df = pd.read_parquet(tables_path+'entity_sentiment.parquet')
+    entity_sent_df = pd.read_parquet(tables_path+'entity_sentiment.parquet')
 
     # dynamic named entity files for dynamic named entity embeddings
     # change path manually each time!  <x>yearbinned, x user input.
     dynamic_entity4year_doc_df = pd.read_parquet(
-        tables_path+'ne2doc_4yearbinned.parquet') 
+        tables_path+'entity_4yearbinned.parquet') 
     # dynamic_entity5year_doc_df = pd.read_parquet(
     # tables_path+'ne2doc_5yearbinned.parquet')
 
     # person-person similarity files for link prediction
-    similar_descp_persons = pd.read_parquet(
-        tables_path+'similar_descp_persons.parquet')
-
+    # similar_descp_persons = pd.read_parquet(
+    #    tables_path+'similar_descp_persons.parquet')
+    
     # select graph to write
     graph = Graph(scheme="bolt", host="localhost", port=7687,
-                  auth=('neo4j', 'bos'), name='frus5288')
+                  auth=('neo4j', 'bos'), name='frus1952-1988')
 
     # uncomment below if writing from scratch. leave on comment if updating
-    # graph.delete_all()
+    graph.delete_all()
 
     # define pre and post processors
     # Now neo4j does not support the numpy dtype int64, so we need to convert 
@@ -141,6 +140,16 @@ if __name__ == "__main__":
         else:
             return Attribute(attribute.key,
                              datetime.strptime(attribute.value, '%Y-%m-%d'))
+
+    @register_attribute_postprocessor
+    def AUX2(attribute):
+        # check if field is Nan
+        if isinstance(attribute.value, float) and math.isnan(attribute.value):
+            return Attribute(attribute.key, attribute.value)
+        else:
+            temp_val = attribute.value
+            return Attribute(attribute.key,
+                             temp_val.to_pydatetime())
 
     @register_subgraph_preprocessor
     def ONLY_CREATE_IF_EXISTS(resource: Resource, key) -> Resource:
@@ -169,37 +178,48 @@ if __name__ == "__main__":
         sqllite_handler.execute("INSERT INTO transcript \
                                 VALUES(?,?,?);", (id, text, keywords))
         return resource
-
+    
     iterator = IteratorIterator(
         [PandasDataframeIterator(doc_df, "Document"), 
-         # PandasDataframeIterator(era_df, "Era"), 
-         # PandasDataframeIterator(person_df, "Person"),
-         # PandasDataframeIterator(person_sentby_df, "PersonSentBy"),
-         # PandasDataframeIterator(person_sentto_df, "PersonSentTo"),
-         # PandasDataframeIterator(person_mentioned_df, "PersonMentionedIn"),
-         # PandasDataframeIterator(country_df, "Country"),
-         # PandasDataframeIterator(city_country_df, "CityCountry"),
+         PandasDataframeIterator(era_df, "Era"), 
+         PandasDataframeIterator(person_df, "Person"),
+         PandasDataframeIterator(person_sentby_df, "PersonSentBy"),
+         PandasDataframeIterator(person_sentto_df, "PersonSentTo"),
+         PandasDataframeIterator(person_mentioned_df, "PersonMentionedIn"),
+         PandasDataframeIterator(country_df, "Country"),
+         PandasDataframeIterator(city_country_df, "CityCountry"),
          # PandasDataframeIterator(country_mentioned_df, "CountryMentionedIn"),
-         # PandasDataframeIterator(religion_df, "Religion"),
-         # PandasDataframeIterator(occupation_df, "Occupation"),
-         # PandasDataframeIterator(political_party_df, "PoliticalParty"),
-         # PandasDataframeIterator(role_df, "Role"),
-         # PandasDataframeIterator(school_df, "School"),
-         # PandasDataframeIterator(citizenship_df, "Citizenship"),
-         # PandasDataframeIterator(redaction_df, "Redaction"),
-         # PandasDataframeIterator(topic_desc_BertWithEntities_df, "TopicBertWithEntities"),
-         # PandasDataframeIterator(doc_topic_BertWithEntities_df, "DocTopicBertWithEntities"),
-         # PandasDataframeIterator(topic_desc_BertNoEntities_df, "TopicBertNoEntities"),
-         # PandasDataframeIterator(doc_topic_BertNoEntities_df, "DocTopicBertNoEntities"),
-         # PandasDataframeIterator(topic_desc_LDANoEntities_df, "TopicLDANoEntities"),
-         # PandasDataframeIterator(doc_topic_LDANoEntities_df, "DocTopicLDANoEntities"),
-         # PandasDataframeIterator(entity_sent_df, "EntitySentiment"),
-         # PandasDataframeIterator(dynamic_entity4year_doc_df, "DocDynamicEnt4YearBinned"),
-         # PandasDataframeIterator(dynamic_entity5year_doc_df, "DocDynamicEnt5YearBinned")
-         # PandasDataframeIterator(similar_descp_persons, "PersonDescpSimilarity"),
-        ])
-
-    converter = Converter(load_file(filename), iterator, graph, num_workers=12)
+         PandasDataframeIterator(religion_df, "Religion"),
+         PandasDataframeIterator(occupation_df, "Occupation"),
+         PandasDataframeIterator(political_party_df, "PoliticalParty"),
+         PandasDataframeIterator(role_df, "Role"),
+         PandasDataframeIterator(school_df, "School"),
+         PandasDataframeIterator(citizenship_df, "Citizenship"),
+         PandasDataframeIterator(redaction_df, "Redaction"),
+         PandasDataframeIterator(term_df, "Term"),
+         PandasDataframeIterator(term_mentioned_df, "TermMentionedIn"),
+         PandasDataframeIterator(topic_desc_BertWithEntities_df,
+                                 "TopicBertWithEntities"),
+         PandasDataframeIterator(doc_topic_BertWithEntities_df,
+                                 "DocTopicBertWithEntities"),
+         PandasDataframeIterator(topic_desc_BertNoEntities_df,
+                                 "TopicBertNoEntities"),
+         PandasDataframeIterator(doc_topic_BertNoEntities_df,
+                                 "DocTopicBertNoEntities"),
+         PandasDataframeIterator(topic_desc_LDANoEntities_df,
+                                 "TopicLDANoEntities"),
+         PandasDataframeIterator(doc_topic_LDANoEntities_df,
+                                 "DocTopicLDANoEntities"),
+         PandasDataframeIterator(entity_sent_df, "EntitySentiment"),
+         PandasDataframeIterator(dynamic_entity4year_doc_df,
+                                 "DocDynamicEnt4YearBinned"),
+         # PandasDataframeIterator(dynamic_entity5year_doc_df,
+         #  "DocDynamicEnt5YearBinned")
+         # PandasDataframeIterator(similar_descp_persons, 
+         # "PersonDescpSimilarity"),
+         ])
+    
+    converter = Converter(load_file(filename), iterator, graph, num_workers=13)
 
     converter()
 

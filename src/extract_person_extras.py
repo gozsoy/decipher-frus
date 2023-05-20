@@ -1,7 +1,7 @@
 import ssl
 import pandas as pd
 from SPARQLWrapper import SPARQLWrapper, JSON
-#import ray
+# import ray
 from tqdm import tqdm
 tqdm.pandas()
 
@@ -11,7 +11,8 @@ user_agent = 'CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org)'
 sparqlwd = SPARQLWrapper("https://query.wikidata.org/sparql", agent=user_agent)
 sparqlwd.setReturnFormat(JSON)
 
-tables_path = '../tables/tables_52_88_demo/'
+# define path to save extracted files
+tables_path = '../tables/tables_1952_1988/'
 
 
 # HELPERS ABOUT PERSON-ITS METADATA
@@ -48,7 +49,6 @@ def educated_f(Q):
 
 def occupation_f(Q):
     query = """SELECT ?item ?itemLabel
-            SELECT ?item ?itemLabel
             WHERE 
             {
             wd:"""+Q+""" wdt:P106 ?item.
@@ -125,9 +125,7 @@ def execute_query(type, entity):
 
 # helper function for searching all persons wikidata entries from a certain 
 # information type and returning in a specific format
-#@ray.remote
 def process_query(row, type):
-    ssl._create_default_https_context = ssl._create_unverified_context
    
     entity = row['selected_wiki_entity']
     
@@ -223,70 +221,6 @@ if __name__ == "__main__":
         tables_path+'unified_person_df_final.parquet')
 
     # query wikidata independently for each type
-    '''ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'gender') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    gender_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('gender done')
-
-    ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'religion') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    religion_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('religion done')
-
-    ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'educated') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    educated_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('school done')
-
-    ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'occupation') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    occupation_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('occupation done')
-
-    ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'positionheld') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    positionheld_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('role done')
-
-    ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'citizenship') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    citizenship_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('citizenship done')
-
-    ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'party') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    party_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('party done')
-
-    ray.init(num_cpus=3)
-    futures = [process_query.remote(entity, 'memberof') 
-               for entity in 
-               new_unified_person_df['selected_wiki_entity'].values]
-    memberof_series = pd.Series(ray.get(futures))
-    ray.shutdown()
-    print('memberof done')'''
-
     gender_series = new_unified_person_df.progress_apply(
         process_query, axis=1, args=('gender',))
     print('gender done')
@@ -308,9 +242,6 @@ if __name__ == "__main__":
     party_series = new_unified_person_df.progress_apply(
         process_query, axis=1, args=('party',))
     print('party done')
-    memberof_series = new_unified_person_df.progress_apply(
-        process_query, axis=1, args=('memberof',))
-    print('memberof done')
 
     # write gender information within person dataframe and save
     new_unified_person_df['gender'] = list(map(

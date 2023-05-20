@@ -1,13 +1,14 @@
 import re
-import copy 
-import json
+# import copy 
+# import json
 import glob
-import jellyfish
+# import jellyfish
 from tqdm import tqdm
 import pandas as pd
 import xml.etree.ElementTree as ET
 from collections import Counter
 from SPARQLWrapper import SPARQLWrapper, JSON
+import ray
 
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -25,7 +26,7 @@ sparqlwd = SPARQLWrapper("https://query.wikidata.org/sparql", agent=user_agent)
 sparqlwd.setReturnFormat(JSON)
 
 # define path to save extracted files
-tables_path = 'tables/tables_52_88_demo/'
+tables_path = '../tables/tables_1952_1988/'
 
 # only use documents within these years
 start_year, end_year = 1952, 1988
@@ -33,6 +34,7 @@ start_year, end_year = 1952, 1988
 
 # helper function 1 step 0
 # extract placeName tag within a given document and save it to city_df
+@ray.remote
 def extract_city(doc):
 
     # city
@@ -43,10 +45,7 @@ def extract_city(doc):
     else:
         city = None
 
-    global city_df
-    city_df = pd.concat((city_df, 
-                         pd.DataFrame({'name': [city]})), ignore_index=True)
-    return
+    return {'placeName': city}
 
 
 # helper function 1 step 1
@@ -237,7 +236,7 @@ def merger4(row):
         return d1
 
 
-# helper function 1 step 3
+'''# helper function 1 step 3
 # computes similarity between two str acc to func
 def compute_sim(s1, func, s2):
     return func(s1, s2)
@@ -256,7 +255,7 @@ def find_matches(s2):
     misspelling_idx = set(
         spiro_dist_df[(spiro_dist_df['dam_lev_dist'] <= 1)].index.values)
 
-    return misspelling_idx
+    return misspelling_idx'''
 
 
 # helper function 1 step 4
@@ -325,11 +324,13 @@ if __name__ == "__main__":
     #####
     # STEP 0: extract placeName tags from each document
     #####
+    
+    # city_df = pd.DataFrame(columns=['name'])
+    ray.init(num_cpus=13)
+    global_city_list = []
 
-    city_df = pd.DataFrame(columns=['name'])
-
-    for file in glob.glob('volumes/frus*'):
-        file_start_year = int(file[12:16])
+    for file in tqdm(glob.glob('../volumes/frus*')):
+        file_start_year = int(file[15:19])
         
         if file_start_year >= start_year and file_start_year <= end_year:
 
@@ -338,16 +339,20 @@ if __name__ == "__main__":
 
             docs = root.findall(
                 './dflt:text/dflt:body//dflt:div[@type="document"]', ns)
-            for doc in docs:
-                extract_city(doc)
+            futures = [extract_city.remote(doc) for doc in docs]
+            result_list = ray.get(futures)
+            global_city_list += result_list  
 
+    ray.shutdown()
+    city_df = pd.DataFrame(global_city_list)
     city_df.dropna(inplace=True)
     city_df.drop_duplicates(inplace=True)
     city_df.reset_index(drop=True, inplace=True)
 
     # split place names with name-extension pairs if exist
-    extension_col = city_df['name'].apply(lambda x: " ".join(x.split(',')[1:]))
-    name_col = city_df['name'].apply(lambda x: x.split(',')[0])
+    extension_col = city_df['placeName'].apply(
+        lambda x: " ".join(x.split(',')[1:]))
+    name_col = city_df['placeName'].apply(lambda x: x.split(',')[0])
     city_df['name'] = name_col
     city_df['extension'] = extension_col
     city_df['extension'] = city_df['extension'].apply(
@@ -355,11 +360,10 @@ if __name__ == "__main__":
 
     #####
     # STEP 1: quick matching with a static geonames dataset
-    # (requires manual work, follow terminal outputs)
     #####
 
     # using external source for quick matching before wikidata
-    wc_df = pd.read_csv('tables/world-cities.csv')
+    wc_df = pd.read_csv('../tables/world-cities.csv')
 
     city_df['extension_match'] = city_df['extension'].apply(lambda x: f(x))
     city_df['wc_guess'] = city_df[city_df['extension'].isna()]['name']\
@@ -368,12 +372,13 @@ if __name__ == "__main__":
 
     # extension match: found country for the extension within static database
     # wc_guess: found country for strings with no extension within database
-    city_df = city_df[['name', 'country', 'extension_match', 'wc_guess']]
+    city_df = city_df[['placeName', 'name', 'extension', 
+                       'country', 'extension_match', 'wc_guess']]
+    city_df['placeName'] = city_df['placeName'].apply(lambda x: '\"'+x+'\"')
 
     # save and edit
-    city_df.to_csv(tables_path+'city.csv')
-    input("Go to csv file. Resolve multi-match cases in 'country' column\
-           by hand, and press Enter to continue")
+    # city_df.to_csv(tables_path+'city_step1.csv')
+    print('step 1 done.')
 
     #####
     # STEP 2: wikidata matching for unmatched cases in step 1 
@@ -381,7 +386,7 @@ if __name__ == "__main__":
     #####
 
     # load corrected one
-    city_df = pd.read_csv(tables_path+'city.csv')
+    # city_df = pd.read_csv(tables_path+'city_step1.csv')
 
     # find country if city is capital
     wiki_df = city_df[city_df['extension_match'].apply(
@@ -402,115 +407,33 @@ if __name__ == "__main__":
 
     # save and edit
     city_df.to_csv(tables_path+'city.csv')
-    input("Go to csv file. Correct name-country columns mismatches by hand,\
-           and press Enter to continue")
+    input("Go to city.csv. Resolve multi-match cases in 'country' column "
+          "by hand. You may correct name-country columns mismatches by hand "
+          "as well and press Enter to continue")
+    print('step 2 done.')
 
     #####
-    # STEP 3: misspelling matching
-    # (requires manual work, follow terminal outputs)
+    # STEP 3: finalize process with several last steps
     #####
 
     # load corrected one
     city_df = pd.read_csv(tables_path+'city.csv')
-    city_df = city_df[['name', 'country']]
-    all_names = city_df['name'].values
-
-    # name : matched names dict
-    t = {}
-    for idx in tqdm(range(len(all_names))):
-        name = all_names[idx]
-        t[idx] = find_matches(name)
-
-    # code to merge found matches
-    # finds friend of friend is friend!
-    scratch_t = copy.deepcopy(t)
-    changed_flag = True
-
-    while changed_flag:
-
-        changed_flag = False
-
-        for key in t:
-            
-            for matched_idx in t[key]:
-
-                if key != matched_idx:
-                    if scratch_t.get(key, None) and \
-                       scratch_t.get(matched_idx, None):
-                        changed_flag = True
-                        t[key] = t[key].union(t[matched_idx])
-                        scratch_t.pop(matched_idx, None)
-            
-        unwanted = set(t.keys()) - set(scratch_t.keys())
-        print(f'removing {len(unwanted)} keys.')
-        for unwanted_key in unwanted:
-            del t[unwanted_key]
-        scratch_t = copy.deepcopy(t)
-        print('---')
-
-    for temp_key in t:
-        
-        te_df = city_df.iloc[list(t[temp_key])]
-
-        name_list = te_df['name'].values
-
-        country_list = te_df['country'].values
-        country_list = [c for c in country_list if c == c]
-        country_list = list(set(country_list))
-        if len(country_list) == 0:
-            country_list = None
-        elif len(country_list) == 1:
-            country_list = country_list[0]
-
-        city_df.at[temp_key, 'name_list'] = name_list
-        city_df.at[temp_key, 'country'] = country_list
-
-    city_df = city_df.loc[t.keys()]
-
-    # saving as parquet is because to retrieve name_list column as list
-    city_df.to_csv(tables_path+'city.csv')
-
-    city_df[['name_list']].to_parquet(tables_path+'city_namelist.parquet')
-
-    input("Go to csv file. Resolve multi-match cases in 'country'\
-           column by hand, and press Enter to continue")
-
-    #####
-    # STEP 4: finalize process with several last steps
-    #####
+    city_df = city_df[['placeName', 'name', 'extension', 'country']]
+    
+    # remove double quotes around original name
+    city_df['placeName'] = city_df['placeName'].apply(lambda x: x[1:-1])
 
     # wikidata and static database country name unifier
     city_df['country'] = city_df['country'].apply(name_converter)
 
-    # load corrected one
-    city_df = pd.read_csv(tables_path+'city.csv')
-    name_list_df = pd.read_parquet(
-        tables_path+'city_namelist.parquet').reset_index(drop=True)
-    city_df['name_list'] = name_list_df['name_list']
-
-    # used in document_extraction.py to find unified city name
-    city_lookup_dict = {}  # 'misspelled':'corrected'
-
-    for _, row in city_df.iterrows():
-
-        for misspelled_name in row['name_list']:
-            
-            if misspelled_name not in city_lookup_dict:
-                city_lookup_dict[misspelled_name] = row['name']
-
-    city_df = city_df[['name', 'country', 'name_list']]
-
+    # save as parquet this time
     city_df.to_parquet(tables_path+'city.parquet')
 
-    json = json.dumps(city_lookup_dict)
-    f3 = open(tables_path+"city_lookup_dict.json", "w")
-    f3.write(json)
-    f3.close()
-
     #####
-    # STEP 5: create country-wikiTag dataframe
+    # STEP 4: create country-wikiTag dataframe
     #####
-
+    
+    city_df = pd.read_parquet(tables_path+'city.parquet')
     country_tag_pairs = list(map(process_name2, city_df['country'].unique()))
 
     countryLabel = list(map(lambda x: x[0], country_tag_pairs))

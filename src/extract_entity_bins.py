@@ -7,11 +7,12 @@ import ray
 
 nlp = spacy.load('en_core_web_sm')
 
-tables_path = 'tables/tables_52_88/'
+# define path to save extracted files
+tables_path = '../tables/tables_1952_1988/'
 
 # these entities will be omitted when found
-uninformative_entities = ['DATE', 'TIME', 'QUANTITY', 
-                          'ORDINAL', 'CARDINAL', 'MONEY', 'PERCENT']
+uninformative_entities = ['DATE', 'TIME', 'QUANTITY', 'ORDINAL',
+                          'CARDINAL', 'MONEY', 'PERCENT' 'PERSON']
 
 # threshold based on count - hyperparameter
 min_ne_count = 50
@@ -19,6 +20,7 @@ min_ne_count = 50
 # bin size in years - hyperparameter
 bin_size = 4
 name_extension = '_'+str(bin_size)+'yearbinned'
+bins = list(range(1952, 1990, bin_size))
 
 
 # helper function that finds each named entity given document text
@@ -35,6 +37,10 @@ def apply_ner(tpl):
 
     # check if text is null
     if not (isinstance(sentence, float) and math.isnan(sentence)):
+
+        # trimming extra long texts for memory in terms of ch
+        if len(sentence) > 1000000:
+            sentence = sentence[:1000000]
 
         doc = nlp(sentence)
 
@@ -78,9 +84,9 @@ def apply_ner(tpl):
 if __name__ == '__main__':
 
     # load document file
-    doc_df = pd.read_csv(tables_path+'doc.csv')
+    doc_df = pd.read_parquet(tables_path+'doc.parquet')
     # remove editorial notes since they do not have year
-    doc_df = doc_df[doc_df['subtype'] != 'editorial-note'] 
+    # doc_df = doc_df[doc_df['subtype'] != 'editorial-note'] now have
 
     id_to_text_list = doc_df['id_to_text'].values
     free_text_list = doc_df['text'].values
@@ -111,10 +117,9 @@ if __name__ == '__main__':
         filter(lambda x: len(x) >= min_ne_count)
 
     # create bins
-    bins = list(range(1950, 1990, bin_size))
     labels = []
     for i in range(1, len(bins)):
-        labels.append(str(bins[i-1])[-2:]+'-'+str(bins[i])[-2:])
+        labels.append(str(bins[i-1])+'-'+str(bins[i]))
 
     # bin each year
     ne2doc_df['bin'] = pd.cut(ne2doc_df['year'], bins=bins, 

@@ -1,7 +1,8 @@
 import glob
-import json
+# import json
 import pandas as pd
 from tqdm import tqdm
+import datetime as dtm
 from datetime import datetime
 import xml.etree.ElementTree as ET
 from lexicalrichness import LexicalRichness
@@ -16,10 +17,10 @@ ns = {'xml': 'http://www.w3.org/XML/1998/namespace',
       }
 
 # define path to save extracted files
-tables_path = 'tables/tables_52_88_demo/'
+tables_path = '../tables/tables_1952_1988/'
 
 # only use documents within these years
-start_year, end_year = 1952, 1958
+start_year, end_year = 1952, 1988
 
 
 # helper function for parsing a single document from a volume into its fields
@@ -31,19 +32,29 @@ def extract_document(doc, volume):
                 doc.attrib['{http://www.w3.org/XML/1998/namespace}id']
 
     # extract document subtype
-    subtype = doc.attrib['subtype']
+    try:
+        subtype = doc.attrib['subtype']
+    except:
+        subtype = "historical-document"
 
     # extract document date, year, president era
     date = None
     year = None
     era = None
-    if subtype != 'editorial-note':
-        fmt = doc.attrib[
-            '{http://history.state.gov/frus/ns/1.0}doc-dateTime-max']
-        date = datetime.strptime(fmt.split('T')[0], '%Y-%m-%d')
-        year = datetime.strptime(fmt.split('T')[0], '%Y-%m-%d').year
+    # if subtype != 'editorial-note':
+    fmt = doc.attrib[
+        '{http://history.state.gov/frus/ns/1.0}doc-dateTime-max']
+    date = datetime.strptime(fmt.split('T')[0], '%Y-%m-%d')
+    year = datetime.strptime(fmt.split('T')[0], '%Y-%m-%d').year
+    try:
         era = era_df[(era_df['startDate'] <= date)
                      & (era_df['endDate'] > date)].president.values[0]
+    except:
+        volume_year = int(volume[4:8])
+        year = volume_year
+        date = dtm.datetime(volume_year, 1, 1)
+        era = era_df[(era_df['startYear'] <= volume_year)
+                     & (era_df['endYear'] > volume_year)].president.values[0]
 
     # extract document pyhsical source
     source_tag = doc.find('.//dflt:note[@type="source"]', ns)
@@ -55,21 +66,27 @@ def extract_document(doc, volume):
 
     # extract document title, removes if <note> exists!
     head_tag = doc.find('./dflt:head', ns)
-    child_note_tags = head_tag.findall('./dflt:note', ns)
+    if head_tag:
+        child_note_tags = head_tag.findall('./dflt:note', ns)
 
-    for note_tag in child_note_tags:
-        head_tag.remove(note_tag)
+        for note_tag in child_note_tags:
+            head_tag.remove(note_tag)
 
-    title = " ".join(ET.tostring(head_tag,
-                                 encoding='unicode', method='text').split())
+        title = " ".join(ET.tostring(head_tag,
+                                     encoding='unicode',
+                                     method='text').split())
+    else:
+        title = 'No title.'
 
     # extract document source city (place actually)
     place_tag = doc.find('.//dflt:placeName', ns)
     if place_tag is not None:
         txt = "".join(place_tag.itertext())
         txt = " ".join(txt.split())
-        txt = " ".join(txt.split(',')[0].split())
-        city = city_lookup_dict[txt]
+        city = txt
+        # txt = " ".join(txt.split(',')[0].split())
+        # city = city_lookup_dict[txt]
+        # city = txt
     else:
         city = None
 
@@ -247,8 +264,12 @@ def extract_document(doc, volume):
     txt_len = lex.words
     subj = round(blob.sentiment[1], 2)
     pol = round(blob.sentiment[0], 2)
-    ttr = round(lex.ttr, 2)
-    cttr = round(lex.cttr, 2)
+    if txt_len != 0:
+        ttr = round(lex.ttr, 2)
+        cttr = round(lex.cttr, 2)
+    else:
+        ttr = 0
+        cttr = 0
 
     # merge all extracted info into one
     doc_dict = {'id_to_text': id_to_text, 'volume': volume, 'subtype': subtype,
@@ -275,12 +296,12 @@ if __name__ == "__main__":
     ray.init(num_cpus=13)
 
     # city lookup table for unification
-    with open(tables_path+'city_lookup_dict.json', 'r') as f:
-        city_lookup_dict = json.load(f)
+    # with open(tables_path+'city_lookup_dict.json', 'r') as f:
+    #    city_lookup_dict = json.load(f)
 
     # person id to unified name lookup table
     new_unified_person_df = pd.read_parquet(
-        tables_path+'new_unified_person_df_final.parquet')
+        tables_path+'unified_person_df_final.parquet')
 
     person_id_lookup_dict = {}  # 'id':'corrected'
     for _, row in new_unified_person_df.iterrows():
@@ -291,7 +312,7 @@ if __name__ == "__main__":
 
     # term id to unified name lookup table
     new_unified_institution_df = pd.read_parquet(
-        tables_path+'new_unified_institution_df.parquet')
+        tables_path+'unified_term_df.parquet')
 
     institution_id_lookup_dict = {}  # 'id':'corrected'
     for _, row in new_unified_institution_df.iterrows():
@@ -310,7 +331,7 @@ if __name__ == "__main__":
                  '{http://www.tei-c.org/ns/1.0}list']
 
     # compute presidential era start and end dates
-    era_df = pd.read_csv('tables/era.csv')
+    era_df = pd.read_csv('../tables/era.csv')
     era_df['startDate'] = era_df['startDate'].apply(
         lambda x: datetime.strptime(x, '%Y-%m-%d'))
     era_df['endDate'] = era_df['endDate'].apply(
@@ -324,12 +345,12 @@ if __name__ == "__main__":
     global_doc_list = []
 
     # main loop over all volumes
-    for file in tqdm(glob.glob('volumes/frus*')):
-        file_start_year = int(file[12:16])
+    for file in tqdm(glob.glob('../volumes/frus*')):
+        file_start_year = int(file[15:19])
 
         # if volume date is within specified dates
         if file_start_year >= start_year and file_start_year <= end_year:
-            volume = file[8:-4]
+            volume = file[11:-4]
 
             tree = ET.parse(file)
             root = tree.getroot()
@@ -362,7 +383,7 @@ if __name__ == "__main__":
     person_mentioned_df = pd.DataFrame(global_person_mentioned_list)
     instution_mentioned_df = pd.DataFrame(global_institution_mentioned_list)
 
-    doc_df.to_csv(tables_path+'doc.csv')
+    doc_df.to_parquet(tables_path+'doc.parquet')
     person_sentby_df.to_csv(tables_path+'person_sentby.csv')
     person_sentto_df.to_csv(tables_path+'person_sentto.csv')
 
@@ -374,6 +395,6 @@ if __name__ == "__main__":
     instution_mentioned_df = instution_mentioned_df[['description_set', 
                                                      'mentioned_in']]\
         .drop_duplicates().reset_index(drop=True)
-    instution_mentioned_df.to_csv(tables_path+'instution_mentioned.csv')
+    instution_mentioned_df.to_csv(tables_path+'term_mentioned.csv')
     
-    print('finished')
+    print('finished.')

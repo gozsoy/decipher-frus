@@ -30,7 +30,7 @@ sparqlwd = SPARQLWrapper("https://query.wikidata.org/sparql", agent=user_agent)
 sparqlwd.setReturnFormat(JSON)
 
 # define path to save extracted files
-tables_path = 'tables/tables_52_88_demo/'
+tables_path = '../tables/tables_1952_1988/'
 
 # only use documents within these years
 start_year, end_year = 1952, 1988
@@ -39,7 +39,7 @@ start_year, end_year = 1952, 1988
 # helper function 1 step 0
 # parses person item and extracts name, id, description
 def extract_person(item, file):
-    volume = file[8:-4]
+    volume = file[11:-4]
 
     persName_item = item.find('.//dflt:persName[@xml:id]', ns)
 
@@ -283,8 +283,8 @@ if __name__ == "__main__":
     #####
     # STEP 0: extract person annotations from each volume
     #####
-    for file in tqdm(glob.glob('volumes/frus*')):
-        file_start_year = int(file[12:16])
+    for file in tqdm(glob.glob('../volumes/frus*')):
+        file_start_year = int(file[15:19])
         
         # within confined period
         if file_start_year >= start_year and file_start_year <= end_year:
@@ -419,7 +419,7 @@ if __name__ == "__main__":
     #####
     
     # init and run parallel processing
-    ray.init(num_cpus=13)
+    ray.init(num_cpus=5)
     new_unified_person_df = pd.read_parquet(
         tables_path+'unified_person_df_step3.parquet')
     futures = [process_name_list.remote(row) 
@@ -442,12 +442,12 @@ if __name__ == "__main__":
     model = SentenceTransformer('all-MiniLM-L6-v2')
 
     # again multiprocessing
-    ray.init(num_cpus=8)
-    new_unified_person_df_wikicol = pd.read_parquet(
+    ray.init(num_cpus=5)
+    new_unified_person_df = pd.read_parquet(
         tables_path+'unified_person_df_step4.parquet')
 
     futures = [process_wiki_col.remote(row) 
-               for _, row in new_unified_person_df_wikicol.iterrows()]
+               for _, row in new_unified_person_df.iterrows()]
     selected_wiki_entity = ray.get(futures)
     ray.shutdown()
 
