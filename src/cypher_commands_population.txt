@@ -1,0 +1,284 @@
+# extremely fast graph population with Neo4j's LOAD CSV
+
+CREATE INDEX doc_index FOR (d:Document) ON (d.docID)
+CREATE INDEX person_index FOR (p:Person) ON (p.name)
+CREATE INDEX city_index FOR (c:City) ON (c.name)
+CREATE INDEX era_index FOR (e:PresidentialEra) ON (e.name)
+CREATE INDEX country_index FOR (c:Country) ON (c.name)
+CREATE INDEX occupation_index FOR (o:Occupation) ON (o.name)
+CREATE INDEX school_index FOR (s:School) ON (s.name)
+CREATE INDEX party_index FOR (p:PoliticalParty) ON (p.name)
+CREATE INDEX role_index FOR (r:Role) ON (r.name)
+CREATE INDEX religion_index FOR (r:Religion) ON (r.name)
+CREATE INDEX bert_topic_index FOR (t:TopicBertWithEntities) ON (t.name)
+CREATE INDEX bert_topic_no_entity_index FOR (t:TopicBertNoEntities) ON (t.name)
+CREATE INDEX lda_topic_no_entity_index FOR (t:TopicLDANoEntities) ON (t.name)
+CREATE INDEX dynamic_entity_4_index FOR (dne:DynamicEntity4YearBinned) ON (dne.name)
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///era.csv' AS row
+CALL {
+    with row
+    merge (e:PresidentialEra {name:row.president})
+    on create set 
+        e.startDate = date(row.startDate),
+        e.endDate = date(row.endDate),
+        e.startYear = toInteger(row.startYear),
+        e.endYear = toInteger(row.endYear)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///country.csv' AS row
+CALL {
+    with row
+    merge (c:Country {name:row.countryLabel})
+    on create set 
+        c.tag = row.countryTag
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///city.csv' AS row
+CALL {
+    with row
+    merge (ci:City {name:row.placeName})
+    with row, ci
+    match (c:Country {name:row.country})
+    merge (ci)-[:LOCATED_IN]->(c)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///doc.csv' AS row
+CALL {
+    with row
+    merge (d:Document {docID:row.id_to_text})
+    on create set 
+        d.subtype = row.subtype,
+        d.volume = row.volume,
+        d.date = date(row.date),
+        d.year = toInteger(row.year),
+        d.text_length = toInteger(row.txt_len),
+        d.subjectivity = toFloat(row.subj),
+        d.polarity = toFloat(row.pol),
+        d.type_token_ratio = toFloat(row.ttr),
+        d.corrected_type_token_ratio = toFloat(row.cttr)
+    with row, d
+    match (c:City {name:row.city})
+    match (e:PresidentialEra {name:row.era})
+    merge (d)-[:FROM]->(c)
+    merge (d)-[:DURING]->(e)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///unified_person_df_final.csv' AS row
+CALL {
+    with row
+    merge (p:Person {name:row.name_set})
+    on create set 
+        p.name_list = row.name_list,
+        p.id_list = row.id_list,
+        p.description_list = row.description_list,
+        p.candidate_wiki_entries = row.wiki_col,
+        p.selected_wiki_entity = row.selected_wiki_entity,
+        p.gender = row.gender
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_sentby.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.sent})
+    match (p:Person {name:row.person_name})
+    merge (d)-[:SENT_BY]->(p)
+    } IN TRANSACTIONS OF 100000 ROWS;
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_sentto.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.received})
+    match (p:Person {name:row.person_name})
+    merge (d)-[:SENT_TO]->(p)
+    } IN TRANSACTIONS OF 100000 ROWS;
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_mentioned.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.mentioned_in})
+    match (p:Person {name:row.person_name})
+    merge (d)-[:MENTIONED]->(p)
+    } IN TRANSACTIONS OF 100000 ROWS;
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_citizenship.csv' AS row
+CALL {
+    with row
+    merge (p:Person {name:row.name_set})
+    merge (c:Country {name:row.info_name})
+    merge (p)-[r:CITIZEN_OF]->(c)
+    on create set
+      c.tag = row.info_tag,
+      r.started = row.start_year,
+      r.ended = row.end_year
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_occupation.csv' AS row
+CALL {
+    with row
+    merge (p:Person {name:row.name_set})
+    merge (o:Occupation {name:row.info_name})
+    merge (p)-[r:WORKED_AS]->(o)
+    on create set
+      o.tag = row.info_tag
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_school.csv' AS row
+CALL {
+    with row
+    merge (p:Person {name:row.name_set})
+    merge (s:School {name:row.info_name})
+    merge (p)-[r1:EDUCATED_AT]->(s)
+    on create set
+      s.tag = row.info_tag
+    with row, s
+    where row.country is not null
+    merge (c:Country {name:row.country})
+    merge (s)-[r2:IN]->(c)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_political_party.csv' AS row
+CALL {
+    with row
+    merge (p:Person {name:row.name_set})
+    merge (po:PoliticalParty {name:row.info_name})
+    merge (p)-[r1:MEMBER_OF]->(po)
+    on create set
+      po.tag = row.info_tag,
+      r1.started = row.start_year,
+      r1.ended = row.end_year
+    with row, po
+    where row.country is not null
+    merge (c:Country {name:row.country})
+    merge (po)-[r2:IN]->(c)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_role.csv' AS row
+CALL {
+    with row
+    merge (p:Person {name:row.name_set})
+    merge (r:Role {name:row.info_name})
+    merge (p)-[rel:POSITION_HELD]->(r)
+    on create set
+      r.tag = row.info_tag,
+      rel.started = row.start_year,
+      rel.ended = row.end_year
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///person_religion.csv' AS row
+CALL {
+    with row
+    merge (p:Person {name:row.name_set})
+    merge (r:Religion {name:row.info_name})
+    merge (p)-[:BELIEVED]->(r)
+    on create set
+      r.tag = row.info_tag
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///redaction.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.id_to_text})
+    merge (r:Redaction {redaction_id:toInteger(row.redaction_id)})
+    on create set 
+        r.raw_text = row.raw_text,
+        r.detected_chunks = row.detected_chunks,
+        r.type = row.type_col,
+        r.amount = toFloat(row.amount_col)
+    merge (d)-[:REDACTED]->(r)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///topic_descp.csv' AS row
+CALL {
+    with row
+    merge (t:TopicBertWithEntities {name:row.Name})
+    on create set
+      t.description = row.Top_n_words
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///doc_topic.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.id_to_text})
+    merge (t:TopicBertWithEntities {name:row.assigned_topic})
+    merge (d)-[:ABOUT]->(t)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///topic_descp_entremoved.csv' AS row
+CALL {
+    with row
+    merge (t:TopicBertNoEntities {name:row.Name})
+    on create set
+      t.description = row.Top_n_words
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///doc_topic_entremoved.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.id_to_text})
+    merge (t:TopicBertNoEntities {name:row.assigned_topic})
+    merge (d)-[:ABOUT]->(t)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+# NOT AVAILABLE CURRENTLY
+:auto LOAD CSV WITH HEADERS FROM 'file:///topic_descp_lda_entremoved_min_word_len3.csv' AS row
+CALL {
+    with row
+    merge (t:TopicLDANoEntities {name:row.Name})
+    on create set
+      t.description = row.Top_n_words
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+# NOT AVAILABLE CURRENTLY
+:auto LOAD CSV WITH HEADERS FROM 'file:///doc_topic_lda_entremoved_min_word_len3.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.id_to_text})
+    merge (t:TopicLDANoEntities {name:row.assigned_topic})
+    merge (d)-[:ABOUT]->(t)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///entity_4yearbinned.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.id_to_text})
+    merge (dne:DynamicEntity4YearBinned {name:row.dynamic_named_entity})
+    merge (d)-[:MENTIONED]->(dne)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+
+CREATE INDEX term_index FOR (t:Term) ON (t.name)
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///unified_term_df.csv' AS row
+CALL {
+    with row
+    merge (t:Term {name:row.description_set})
+    on create set 
+        t.name_list = row.description_list,
+        t.id_list = row.id_list
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///term_mentioned.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.mentioned_in})
+    match (t:Term {name:row.description_set})
+    merge (d)-[:MENTIONED]->(t)
+    } IN TRANSACTIONS OF 100000 ROWS; 
