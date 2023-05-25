@@ -14,6 +14,8 @@ CREATE INDEX bert_topic_index FOR (t:TopicBertWithEntities) ON (t.name)
 CREATE INDEX bert_topic_no_entity_index FOR (t:TopicBertNoEntities) ON (t.name)
 CREATE INDEX lda_topic_no_entity_index FOR (t:TopicLDANoEntities) ON (t.name)
 CREATE INDEX dynamic_entity_4_index FOR (dne:DynamicEntity4YearBinned) ON (dne.name)
+CREATE INDEX term_index FOR (t:Term) ON (t.name)
+CREATE INDEX redaction_index FOR (r:Redaction) ON (r.redaction_id)
 
 :auto LOAD CSV WITH HEADERS FROM 'file:///era.csv' AS row
 CALL {
@@ -234,26 +236,6 @@ CALL {
     } IN TRANSACTIONS OF 100000 ROWS; 
 
 
-# NOT AVAILABLE CURRENTLY
-:auto LOAD CSV WITH HEADERS FROM 'file:///topic_descp_lda_entremoved_min_word_len3.csv' AS row
-CALL {
-    with row
-    merge (t:TopicLDANoEntities {name:row.Name})
-    on create set
-      t.description = row.Top_n_words
-    } IN TRANSACTIONS OF 100000 ROWS; 
-
-
-# NOT AVAILABLE CURRENTLY
-:auto LOAD CSV WITH HEADERS FROM 'file:///doc_topic_lda_entremoved_min_word_len3.csv' AS row
-CALL {
-    with row
-    match (d:Document {docID:row.id_to_text})
-    merge (t:TopicLDANoEntities {name:row.assigned_topic})
-    merge (d)-[:ABOUT]->(t)
-    } IN TRANSACTIONS OF 100000 ROWS; 
-
-
 :auto LOAD CSV WITH HEADERS FROM 'file:///entity_4yearbinned.csv' AS row
 CALL {
     with row
@@ -262,9 +244,6 @@ CALL {
     merge (d)-[:MENTIONED]->(dne)
     } IN TRANSACTIONS OF 100000 ROWS; 
 
-
-
-CREATE INDEX term_index FOR (t:Term) ON (t.name)
 
 :auto LOAD CSV WITH HEADERS FROM 'file:///unified_term_df.csv' AS row
 CALL {
@@ -281,4 +260,25 @@ CALL {
     match (d:Document {docID:row.mentioned_in})
     match (t:Term {name:row.description_set})
     merge (d)-[:MENTIONED]->(t)
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+
+# NOT AVAILABLE CURRENTLY
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///topic_descp_lda_entremoved_min_word_len3.csv' AS row
+CALL {
+    with row
+    merge (t:TopicLDANoEntities {name:row.Name})
+    on create set
+      t.description = row.Top_n_words
+    } IN TRANSACTIONS OF 100000 ROWS; 
+
+
+:auto LOAD CSV WITH HEADERS FROM 'file:///doc_topic_lda_entremoved_min_word_len3.csv' AS row
+CALL {
+    with row
+    match (d:Document {docID:row.id_to_text})
+    merge (t:TopicLDANoEntities {name:row.assigned_topic})
+    merge (d)-[:ABOUT]->(t)
     } IN TRANSACTIONS OF 100000 ROWS; 
