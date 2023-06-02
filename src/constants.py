@@ -1,6 +1,6 @@
 # all files
 # only use documents within these years
-START_YEAR, END_YEAR = 1978, 1988
+START_YEAR, END_YEAR = 1861, 1988
 
 # define path to save extracted files
 TABLES_PATH = '../tables/tables_'+str(START_YEAR)+'_'+str(END_YEAR)+'/'
