@@ -3,6 +3,8 @@ import pandas as pd
 from SPARQLWrapper import SPARQLWrapper, JSON
 # import ray
 from tqdm import tqdm
+import constants
+import os
 tqdm.pandas()
 
 # necessary setting for wikidata querying
@@ -11,8 +13,10 @@ user_agent = 'CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org)'
 sparqlwd = SPARQLWrapper("https://query.wikidata.org/sparql", agent=user_agent)
 sparqlwd.setReturnFormat(JSON)
 
-# define path to save extracted files
-tables_path = '../tables/tables_1952_1988/'
+tables_path = constants.TABLES_PATH
+
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 
 # HELPERS ABOUT PERSON-ITS METADATA

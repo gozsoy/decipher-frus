@@ -9,21 +9,19 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction import text 
 from sentence_transformers import SentenceTransformer
 import ray
-
+import os
+import constants
+import argparse
 
 nlp = spacy.load('en_core_web_sm')
 
-tables_path = '../tables/tables_1952_1988/'
-plots_path = '../plots/plots_1952_1988/'
-name_extension = '_entremoved'  # or '' for original docs
+tables_path, plots_path = constants.TABLES_PATH, constants.PLOTS_PATH
 
-# If document embeddings already calculated, set True. if not, set False.
-# Be aware! Sbert runs over each document, it takes time without GPU.
-# We suggest using GPU and storing in tables_path beforehand.
-USE_EMBEDDINGS = True
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
-# Remove named entities from text. only valid if USE_EMBEDDINGS=False.
-REMOVE_ENTITIES = True
+if not os.path.exists(plots_path):
+    os.makedirs(plots_path)
 
 
 # helper function for removing named entities from text
@@ -49,6 +47,32 @@ def remove_entities(txt):
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--topic_count", help="Topic count.", 
+                        default=100)
+    parser.add_argument("-n", "--name_extension", help="Name extension.", 
+                        default='')
+    parser.add_argument("-u", "--use_embeddings", 
+                        help="Whether to use embeddings.", default=True)
+    parser.add_argument("-r", "--remove_entities", 
+                        help="Whether to to remove named entities.", 
+                        default=True)
+    args = parser.parse_args()
+
+    # topic count
+    topic_count = int(args.topic_count)
+
+    # '_entremoved' or '' for original docs
+    name_extension = args.name_extension
+
+    # If document embeddings already calculated, set True. if not, set False.
+    # Be aware! Sbert runs over each document, it takes time without GPU.
+    # We suggest using GPU and storing in tables_path beforehand.
+    USE_EMBEDDINGS = args.use_embeddings
+
+    # Remove named entities from text. only valid if USE_EMBEDDINGS=False.
+    REMOVE_ENTITIES = args.remove_entities
 
     #####
     # STEP 0: load documents, compute their embeddings, and save both
@@ -117,7 +141,7 @@ if __name__ == "__main__":
     # topics = topic_model.reduce_outliers(free_text_list, topics)
     # print('topics outliers reduced. visualization process starting...')
 
-    topic_model.reduce_topics(free_text_list, nr_topics=100)
+    topic_model.reduce_topics(free_text_list, nr_topics=topic_count)
     print('topics reduced.')
 
     #####

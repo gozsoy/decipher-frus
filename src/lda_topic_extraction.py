@@ -7,15 +7,19 @@ import ray
 import numpy as np
 import pandas as pd
 import tomotopy as tp
+import constants
 
 nlp = spacy.load('en_core_web_sm')
 
-tables_path = '../tables/tables_1952_1988/'
-plots_path = '../plots/plots_1952_1988/'
-name_extension = '_lda_entremoved_min_word_len3'
+tables_path, plots_path = constants.TABLES_PATH, constants.PLOTS_PATH
+topic_count = constants.LDA_TOPIC_COUNT
+name_extension = constants.LDA_NAME_EXTENSION
 
-# lda topic count - hyperparameter
-topic_count = 50
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
+
+if not os.path.exists(plots_path):
+    os.makedirs(plots_path)
 
 
 # helper function for removing named entities, stopwords, punctuation,

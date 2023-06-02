@@ -8,6 +8,8 @@ import xml.etree.ElementTree as ET
 from lexicalrichness import LexicalRichness
 from textblob import TextBlob
 import ray
+import os
+import constants
 
 # define namespaces in FRUS schema
 ns = {'xml': 'http://www.w3.org/XML/1998/namespace',
@@ -16,11 +18,11 @@ ns = {'xml': 'http://www.w3.org/XML/1998/namespace',
       'xi': 'http://www.w3.org/2001/XInclude'
       }
 
-# define path to save extracted files
-tables_path = '../tables/tables_1952_1988/'
+tables_path = constants.TABLES_PATH
+start_year, end_year = constants.START_YEAR, constants.END_YEAR
 
-# only use documents within these years
-start_year, end_year = 1952, 1988
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 
 # helper function for parsing a single document from a volume into its fields

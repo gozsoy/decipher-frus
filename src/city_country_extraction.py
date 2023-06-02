@@ -9,6 +9,8 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from SPARQLWrapper import SPARQLWrapper, JSON
 import ray
+import os
+import constants
 
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -25,11 +27,11 @@ user_agent = 'CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org)'
 sparqlwd = SPARQLWrapper("https://query.wikidata.org/sparql", agent=user_agent)
 sparqlwd.setReturnFormat(JSON)
 
-# define path to save extracted files
-tables_path = '../tables/tables_1952_1988/'
+tables_path = constants.TABLES_PATH
+start_year, end_year = constants.START_YEAR, constants.END_YEAR
 
-# only use documents within these years
-start_year, end_year = 1952, 1988
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 
 # helper function 1 step 0
@@ -406,10 +408,10 @@ if __name__ == "__main__":
     city_df['country'] = city_df.apply(merger4, axis=1)
 
     # save and edit
-    city_df.to_csv(tables_path+'city.csv')
-    input("Go to city.csv. Resolve multi-match cases in 'country' column "
-          "by hand. You may correct name-country columns mismatches by hand "
-          "as well and press Enter to continue")
+    city_df.to_csv(tables_path+'city_step1.csv')
+    input("Go to city_step1.csv. Resolve multi-match cases in 'country' "
+          "column by hand. You may correct name-country columns mismatches "
+          "by hand as well and press Enter to continue")
     print('step 2 done.')
 
     #####
@@ -417,7 +419,7 @@ if __name__ == "__main__":
     #####
 
     # load corrected one
-    city_df = pd.read_csv(tables_path+'city.csv')
+    city_df = pd.read_csv(tables_path+'city_step1.csv')
     city_df = city_df[['placeName', 'name', 'extension', 'country']]
     
     # remove double quotes around original name

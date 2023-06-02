@@ -12,6 +12,8 @@ from nltk.tokenize import RegexpTokenizer
 import ray
 from SPARQLWrapper import SPARQLWrapper, JSON
 from sentence_transformers import SentenceTransformer, util
+import constants
+import os
 tqdm.pandas()
 
 tokenizer = RegexpTokenizer(r'\w+')
@@ -29,11 +31,11 @@ user_agent = 'CoolBot/0.0 (https://example.org/coolbot/; coolbot@example.org)'
 sparqlwd = SPARQLWrapper("https://query.wikidata.org/sparql", agent=user_agent)
 sparqlwd.setReturnFormat(JSON)
 
-# define path to save extracted files
-tables_path = '../tables/tables_1952_1988/'
+tables_path = constants.TABLES_PATH
+start_year, end_year = constants.START_YEAR, constants.END_YEAR
 
-# only use documents within these years
-start_year, end_year = 1952, 1988
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 
 # helper function 1 step 0
@@ -136,13 +138,16 @@ def find_matches(idx):
     
     # misspelling check - hyperparameter
     misspelling_idx = set(spiro_dist_df[(
-        spiro_dist_df['dam_lev_dist'] <= 1)].index.values)
+        spiro_dist_df['dam_lev_dist'] <= 
+        constants.PERSON_TYPO_THRESHOLD)].index.values)
 
     # near-duplication check - hyperparameter
     spiro_dist_df = spiro_dist_df[spiro_dist_df['overlap_cnt'] >= 2]
     match_idx = set(
-        spiro_dist_df[(spiro_dist_df['jaro_sim'] >= 0.9) |
-                      (spiro_dist_df['dam_lev_dist'] <= 5)].index.values)
+        spiro_dist_df[(spiro_dist_df['jaro_sim'] >= 
+                       constants.PERSON_JARO_THRESHOLD) |
+                      (spiro_dist_df['dam_lev_dist'] <= 
+                       constants.PERSON_LEVN_THRESHOLD)].index.values)
 
     return match_idx.union(misspelling_idx)
 

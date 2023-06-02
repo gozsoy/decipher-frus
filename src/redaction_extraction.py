@@ -5,6 +5,8 @@ import pandas as pd
 from tqdm import tqdm
 import xml.etree.ElementTree as ET
 import ray
+import constants
+import os
 
 # define namespaces in FRUS schema
 ns = {'xml': 'http://www.w3.org/XML/1998/namespace',
@@ -13,13 +15,13 @@ ns = {'xml': 'http://www.w3.org/XML/1998/namespace',
       'xi': 'http://www.w3.org/2001/XInclude'
       }
 
-# define path to save extracted files
-tables_path = '../tables/tables_1952_1988/'
-
-# only use documents within these years
-start_year, end_year = 1952, 1988
+tables_path = constants.TABLES_PATH
+start_year, end_year = constants.START_YEAR, constants.END_YEAR
 
 nlp = spacy.load('en_core_web_sm')
+
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 
 # helper function 1 step 1

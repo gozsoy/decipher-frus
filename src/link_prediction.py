@@ -3,10 +3,14 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
+import constants
+import os
 tqdm.pandas()
 
-# define path to load, and save extracted files
-tables_path = '../tables/tables_1952_1988/'
+tables_path = constants.TABLES_PATH
+
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 
 # helper function to compute average sentence embedding

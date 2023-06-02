@@ -3,15 +3,19 @@ import math
 import pandas as pd
 from spacytextblob.spacytextblob import SpacyTextBlob
 from multiprocessing import Pool
+import constants
+import os
 
 nlp = spacy.load('en_core_web_sm')
 nlp.add_pipe('spacytextblob')
 
-tables_path = '../tables/tables_1952_1988/'
+tables_path = constants.TABLES_PATH
 
 # these entities will be omitted when found
-unwanted_entities = ['DATE', 'TIME', 'QUANTITY', 'ORDINAL',
-                     'CARDINAL', 'MONEY', 'PERCENT']
+unwanted_entities = constants.UNWANTED_ENT_SENT
+
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 
 # helper function that iterates over each sentence in a document

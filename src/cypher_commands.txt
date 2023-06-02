@@ -72,8 +72,8 @@ match (r2:Role)-[ph2:POSITION_HELD]-(p2)
 where r1<>r2 and 
 ph1.started is not null and ph1.ended is not null and
 ph2.started is not null and ph2.ended is not null and
-tostring(d.date) <> 'NaN' and datetime(ph1.started) <= datetime(d.date) <= datetime(ph1.ended) and
-datetime(ph2.started) <= datetime(d.date) <= datetime(ph2.ended) and
+tostring(d.date) <> 'NaN' and date(datetime(ph1.started)) <= date(d.date) <= date(datetime(ph1.ended)) and
+date(datetime(ph2.started)) <= date(d.date) <= date(datetime(ph2.ended)) and
 size(ph1.started)=20 and size(ph1.ended)=20 and size(ph2.started)=20 and size(ph2.ended)=20
 merge (r1)-[re:CENTRALITY_NEIGHBOR]-(r2)
 return re
@@ -97,21 +97,21 @@ limit 100
 #####
 
 1
-match (e1:Entity)-[:IN]->(d:Document)<-[:IN]-(e2:Entity)
-merge (e1)-[r:NEIGHBOR]-(e2)
+match (e1:DynamicEntity4YearBinned)<-[:MENTIONED]-(d:Document)-[:MENTIONED]->(e2:DynamicEntity4YearBinned)
+merge (e1)-[r:ENTITY_NEIGHBOR]-(e2)
 ON CREATE SET r.weight = 1
 ON MATCH SET r.weight = r.weight + 1
 return r
 limit 10
 
 2
-call gds.graph.project('ne2vec_69_76_proj',
+call gds.graph.project('dynamic_entity_projection',
 'Entity',
 {NEIGHBOR:{orientation:'UNDIRECTED', properties: 'weight'}})
 YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount, projectMillis
 
 3
-CALL gds.fastRP.write('ne2vec_69_76_proj', {embeddingDimension: 128, writeProperty: 'fastrp-embedding',  relationshipWeightProperty: 'weight'})
+CALL gds.fastRP.write('dynamic_entity_projection', {embeddingDimension: 128, writeProperty: 'fastrp-embedding',  relationshipWeightProperty: 'weight'})
 YIELD nodePropertiesWritten
 
 #####
@@ -185,4 +185,6 @@ match (p:Person)-[:BELIEVED]-(r:Religion)
 with person, religion, probability, collect(p.name) as excluded_names
 where not person in excluded_names
 return person, religion, probability
+
+
 

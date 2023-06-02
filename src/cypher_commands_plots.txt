@@ -22,12 +22,12 @@ sns.set_theme(style="whitegrid")
 g = sns.catplot(
     data=temp_df, kind="bar",
     x="era", y="volume", hue="is_annotated",
-    palette="colorblind", alpha=1, height=3, aspect=2,
+    palette="colorblind", alpha=1, height=3, aspect=3,
 ).set(title='Person Annotations in Volumes over Presidential Eras')
 g.despine(left=True)
 for axes in g.axes.flat:
     _ = axes.set_xticklabels(axes.get_xticklabels(), rotation=320)
-    axes.set_xticks([0.8,2,3,4.2,5,5.8,6.8,7.8], temp_df['era'].unique())
+    axes.set_xticks([1.1,2,3.1,4.3,5.1,6.1,7.1,8.2, 9.2, 10.3, 10.9, 12.3,13.3,14,15.3,16.7,17.3,18.9,19.5,20.6,21.4,22.3,23.3,24.5], temp_df['era'].unique())
 g.set_axis_labels("Presidential Eras", "Volume Count")
 g.legend.set_title("Is annotated?")
 
@@ -69,16 +69,14 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 import seaborn as sns
 sns.set_theme(style="whitegrid")
-penguins = sns.load_dataset("penguins")
-# Draw a nested barplot by species and sex
 g = sns.catplot(
     data=overall_df, kind="bar",
     x="bin_size", y="ratio", hue="is_wikified",
-    palette="colorblind", alpha=.8, height=3, aspect=2,
+    palette="colorblind", alpha=1, height=3, aspect=2,
 ).set(title='Person Mention Count vs. Wikification Success')
 g.despine(left=True)
-g.set_axis_labels("First x Most Mentioned Persons", "Person Count")
-g.legend.set_title("is_wikified")
+g.set_axis_labels("Number of Top Most Mentioned Persons", "Ratio")
+g.legend.set_title("Is wikified?")
 
 
 + document count by era
@@ -208,17 +206,51 @@ order by topic_count1 desc
 match (d:Document)
 return d.year as year, avg(d.corrected_type_token_ratio) as avg_cttr, stDev(d.corrected_type_token_ratio) as std_cttr, avg(d.text_length) as txt_len, stDev(d.text_length) as std_txt_len
 import seaborn as sns # Calls in seaborn
-
 fig, ax1 = plt.subplots() # initializes figure and plots
-
 ax2 = ax1.twinx() # applies twinx to ax2, which is the second y axis. 
 #sns.color_palette("colorblind")
 sns.lineplot(x = embedding_df['year'], y = embedding_df['avg_cttr'], ax = ax1, color='b')#,color=sns.color_palette("pastel"))
 sns.lineplot(x = embedding_df['year'], y = embedding_df['txt_len'], ax = ax2, color = 'y')# ,palette='colorblind') # plots the second set, and sets to ax2. 
-
 ax1.set_xlabel('Year')
 ax1.set_ylabel('Average Corrected Type Token Ratio', color='b')
 ax2.set_ylabel('Average Token Count', color='y')
 ax1.set_title('Average Lexical Richness & Text Length over Years')
-
 plt.show()
+
++ doc count by continent new plot
+match (d:Document)-[:FROM]-(c:City)-[:LOCATED_IN]-(co:Country)
+return d.year as year, co.name as country, count(d) as doc_count
+order by doc_count desc
+country_continent = pd.read_csv('../tables/Countries-Continents.csv')
+temp_df = embedding_df.merge(country_continent,how='left',left_on='country',right_on='Country')
+temp_df= temp_df[['year','Continent','doc_count']]
+temp_df = temp_df.sort_values(by='year',ascending=True)
+temp_df = temp_df.drop_duplicates(['year','Continent'])
+temp_df.dropna(inplace=True)
+temp_df = temp_df[temp_df['Continent']!='United States of America']
+import seaborn as sns
+sns.set_theme(style="dark")
+flights = sns.load_dataset("flights")
+# Plot each year's time series in its own facet
+g = sns.relplot(
+    data=temp_df,
+    x="year", y="doc_count", col="Continent", hue="Continent",
+    kind="line", palette="colorblind", linewidth=2, zorder=3,
+    col_wrap=3, height=3, aspect=1.5, legend=False,
+)
+# Iterate over each subplot to customize further
+for year, ax in g.axes_dict.items():
+    # Add the title as an annotation within the plot
+    #ax.text(.8, .85, year, transform=ax.transAxes)
+    # Plot every year's time series in the background
+    sns.lineplot(
+        data=temp_df, x="year", y="doc_count", units="year",
+        estimator=None, color=".7", linewidth=1, ax=ax,
+    )
+# Reduce the frequency of the x axis ticks
+#ax.set_xticks(ax.get_xticks()[::2])
+# Tweak the supporting aspects of the plot
+g.fig.suptitle('Document Frequency by Continent over Years', fontsize=16)
+#g.set_title("Document Frequency by Continent over Years")
+g.set_axis_labels("Year", "Document Count")
+g.tight_layout()

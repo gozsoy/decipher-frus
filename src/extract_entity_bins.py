@@ -4,23 +4,26 @@ import spacy
 import numpy as np
 import pandas as pd
 import ray
+import constants
 
 nlp = spacy.load('en_core_web_sm')
 
 # define path to save extracted files
-tables_path = '../tables/tables_1952_1988/'
+tables_path = constants.TABLES_PATH
+
+if not os.path.exists(tables_path):
+    os.makedirs(tables_path)
 
 # these entities will be omitted when found
-uninformative_entities = ['DATE', 'TIME', 'QUANTITY', 'ORDINAL',
-                          'CARDINAL', 'MONEY', 'PERCENT' 'PERSON']
+uninformative_entities = constants.UNWANTED_ENT_BIN
 
 # threshold based on count - hyperparameter
-min_ne_count = 50
+min_ne_count = constants.MIN_ENTITY_COUNT
 
 # bin size in years - hyperparameter
-bin_size = 4
-name_extension = '_'+str(bin_size)+'yearbinned'
-bins = list(range(1952, 1990, bin_size))
+bin_size = constants.BIN_SIZE
+name_extension = constants.BIN_NAME_EXTENSION
+bins = list(range(constants.START_YEAR, constants.END_YEAR, bin_size))
 
 
 # helper function that finds each named entity given document text
