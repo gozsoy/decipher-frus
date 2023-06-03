@@ -134,6 +134,10 @@ gds.run_cypher(
     """
     CREATE INDEX named_entity_index FOR (ne:NamedEntity) ON (ne.name)
     """)
+gds.run_cypher(
+    """
+    CREATE INDEX source_index FOR (s:Source) ON (s.name)
+    """)
 
 # load csv files
 gds.run_cypher(
@@ -184,6 +188,8 @@ gds.run_cypher(
             d.volume = row.volume,
             d.date = date(row.date),
             d.year = toInteger(row.year),
+            d.instutionSentBy = row.inst_sentby,
+            d.instutionSentTo = row.inst_sentto,
             d.text_length = toInteger(row.txt_len),
             d.subjectivity = toFloat(row.subj),
             d.polarity = toFloat(row.pol),
@@ -195,6 +201,9 @@ gds.run_cypher(
         with row, d
         match (c:City {name:row.city})
         merge (d)-[:FROM]->(c)
+        with row, d
+        match (s:Source {name:row.source})
+        merge (d)-[:STORED]->(s)
         } IN TRANSACTIONS OF 100000 ROWS; 
     """)
 
