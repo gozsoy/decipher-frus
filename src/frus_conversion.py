@@ -202,7 +202,8 @@ gds.run_cypher(
         match (c:City {name:row.city})
         merge (d)-[:FROM]->(c)
         with row, d
-        match (s:Source {name:row.source})
+        where row.source is not null
+        merge (s:Source {name:row.source})
         merge (d)-[:STORED]->(s)
         } IN TRANSACTIONS OF 100000 ROWS; 
     """)
